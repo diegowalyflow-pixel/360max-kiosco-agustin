@@ -292,4 +292,8 @@ const lista = new Promise((resolve, reject) => {
   });
 });
 
-module.exports = { DB_PATH, lista, prepare: preparar, exec: db.exec, transaction: db.transaction };
+// Compatibilidad: algunos módulos hacen `const { db } = require('../db')` y usan
+// db.prepare(...). Exponemos un objeto `db` con la misma API async para que ese
+// patrón funcione (db === el módulo con prepare/exec/transaction).
+const apiDb = { prepare: preparar, exec: db.exec, transaction: db.transaction, DB_PATH, lista };
+module.exports = { DB_PATH, lista, prepare: preparar, exec: db.exec, transaction: db.transaction, db: apiDb };
