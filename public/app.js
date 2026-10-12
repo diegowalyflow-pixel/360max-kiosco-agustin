@@ -59,8 +59,7 @@ window.api = api;
 function mostrarLogin(primerUso) {
   $('#aplicacion').hidden = true;
   $('#acceso').hidden = false;
-  $('#tituloAcceso').textContent = primerUso ? 'Crear usuario administrador' : 'Ingresar';
-  $('#nombreInicial').hidden = !primerUso;
+  $('#tituloAcceso').textContent = 'Ingresar';
   $('#salir').hidden = true;
   $('#sesionUsuario').hidden = true;
   sesion = null;
@@ -237,9 +236,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#login').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const fd = new FormData(ev.target);
-    const cuerpo = { usuario: fd.get('usuario').trim(), clave: fd.get('clave') };
-    const nombre = fd.get('nombre');
-    if (nombre) cuerpo.nombre = String(nombre).trim();
+    const cuerpo = { usuario: fd.get('usuario').trim().toLowerCase(), clave: fd.get('clave') };
     try {
       const r = await api('/api/auth/continuar', { method: 'POST', body: cuerpo });
       ev.target.reset();
