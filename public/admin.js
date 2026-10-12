@@ -518,15 +518,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  document.querySelector('#espejoRefrescar').addEventListener('click', () => {
-    pintarEspejo().then(() => aviso('Espejo actualizado.', 'ok')).catch((e) => aviso(e.message, 'error'));
-  });
-  /* Refresco automático cada minuto, pero solo si Administración está a la vista. */
-  if (espejoTimer) clearInterval(espejoTimer);
-  espejoTimer = setInterval(() => {
-    const vista = document.querySelector('#gestion');
-    if (vista && !vista.hidden) pintarEspejo().catch(() => {});
-  }, 60000);
+  /* Espejo del local: oculto a propósito. La app corre 100% en la nube (Render),
+     no hay control remoto de un local físico, así que no se refresca nada. */
 
   /* ---------- Al entrar a Administración ---------- */
   bus.addEventListener('vista', (ev) => {
@@ -538,7 +531,6 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(() => pintarUsuarios())
       .then(() => pintarArqueos('', ''))
       .then(() => pintarCtas())
-      .then(() => pintarEspejo())
       .catch((e) => aviso(e.message, 'error'));
   });
 });
