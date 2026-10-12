@@ -236,21 +236,43 @@ CREATE TABLE IF NOT EXISTS movimientos_caja (
 async function sembrarDatos() {
   const filaUser = await obtenerCrudo("SELECT COUNT(*) as cant FROM usuarios");
   if (filaUser.cant === 0) {
-    const salt = 'demo_salt';
-    const hash = nuevaClave('admin', salt);
+    // Credenciales del administrador tomadas del entorno (producción).
+    // Si no se define ADMIN_CLAVE, se genera una robusta de un solo uso y se
+    // muestra UNA sola vez en el log (nunca queda un "admin"/"123" conocido).
+    const salt = 'seed_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    const adminUsuario = process.env.ADMIN_USUARIO || 'agustin';
+    const adminNombre = process.env.ADMIN_NOMBRE || 'Agustín';
+    let adminClave = process.env.ADMIN_CLAVE || '';
+    let claveTemporal = false;
+    if (!adminClave) {
+      adminClave = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2).toUpperCase();
+      claveTemporal = true;
+    }
+    const hash = nuevaClave(adminClave, salt);
     await ejecutarCrudo(
-      "INSERT INTO usuarios (nombre, usuario, rol, clave_hash, clave_salt) VALUES ('Administrador', 'admin', 'administrador', ?, ?)",
-      [hash, salt]
+      "INSERT INTO usuarios (nombre, usuario, rol, clave_hash, clave_salt) VALUES (?, ?, 'administrador', ?, ?)",
+      [adminNombre, adminUsuario, hash, salt]
     );
-    await ejecutarCrudo("INSERT INTO cajas (nombre) VALUES ('Caja Principal')");
-    
+    await crearCajaInicial();
+
     console.log('');
     console.log('  [360MAX] Base de datos creada de cero.');
     console.log('  [360MAX] Turno inicial: CERRADO.');
     console.log('  [360MAX] El cliente definirá el fondo inicial desde el navegador.');
+    if (claveTemporal) {
+      console.log('  [360MAX] ADMIN TEMPORAL -> usuario: ' + adminUsuario + ' | clave: ' + adminClave);
+      console.log('  [360MAX] Definí ADMIN_CLAVE en Render y reiniciá para fijar una propia.');
+    } else {
+      console.log('  [360MAX] Admin creado con las credenciales del entorno (ADMIN_USUARIO / ADMIN_CLAVE).');
+    }
     console.log('');
   }
 }
+
+async function crearCajaInicial() {
+  await ejecutarCrudo("INSERT INTO cajas (nombre) VALUES ('Caja Principal')");
+}
+
 
 const lista = new Promise((resolve, reject) => {
   conector = new sqlite3.Database(DB_PATH, async (err) => {
