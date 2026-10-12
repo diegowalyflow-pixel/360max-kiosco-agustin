@@ -1,0 +1,30 @@
+{
+  "name": "proyect360max-comercios",
+  "version": "1.0.0",
+  "description": "360MAX Comercios — sistema de caja, depósito y stock (demo en vivo)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "importar": "node src/scripts/importarProductos.js",
+    "sembrar": "node src/scripts/sembrarDemo.js",
+    "sembrar-agustin": "node src/scripts/seedAgustin.js",
+    "precios": "node src/tools/actualizar-precios.js",
+    "cargar-catalogo": "node src/tools/cargar-catalogo.js",
+    "cargar-lista": "node src/tools/cargar-lista-agustin.js",
+    "revisar": "node herramientas/revision.js",
+    "probar": "node herramientas/prueba-flujo.js",
+    "verificar-catalogo": "node herramientas/verificar-catalogo.js",
+    "kit": "node herramientas/crear-accesos-directos.js",
+    "verificar-instalacion": "node herramientas/verificar-instalacion.js",
+    "revisar-kit": "node herramientas/revisar-kit.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "sqlite3": "^5.1.7",
+    "xlsx": "^0.18.5"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

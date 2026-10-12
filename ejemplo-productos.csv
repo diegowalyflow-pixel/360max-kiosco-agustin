@@ -1,0 +1,17 @@
+nombre;categoria;unidad;codigo_barra;costo;precio;stock;stock_minimo;activo
+Agua mineral 500ml;Bebidas;UNIDAD;7799990000001;600;850;48;12;SI
+Gasesosa cola 500ml;Bebidas;UNIDAD;7799990000002;700;950;36;12;SI
+Yerba mate 1kg;Almacén;UNIDAD;7799990000010;3200;4200;20;6;SI
+Fideos tallarín 500g;Almacén;UNIDAD;7799990000011;900;1350;25;10;SI
+;Almacén;UNIDAD;7799990000012;500;990;10;2;SI
+Galletitas sabor vainilla;Almacén;UNIDAD;7799990000013;abc;1500;15;5;SI
+Maní salado 250g;Snacks;UNIDAD;7799990000020;1100;1700;18;6;SI
+Palitos salados 160g;Snacks;UNIDAD;7799990000021;950;1450;22;8;SI
+Chipa tradicional (unidad);Panadería;UNIDAD;7799990000030;250;400;40;10;SI
+Pan lactal (unidad);Panadería;UNIDAD;7799990000031;1300;1900;14;6;SI
+Queso cremoso;Lácteos;KG;7799990000040;6500;8900;7,5;2;SI
+Yogur bebible 1L;Lácteos;UNIDAD;7799990000041;1500;2100;16;6;SI
+Detergente 750ml;Limpieza;UNIDAD;7799990000050;1200;1750;24;8;SI
+Lavandina 2L;Limpieza;UNIDAD;7799990000051;900;1400;20;8;SI
+;Bebidas;UNIDAD;7799990000001;;1100;12;4;SI
+Agua mineral 500ml;Bebidas;UNIDAD;7799990000001;600;850;48;12;SI

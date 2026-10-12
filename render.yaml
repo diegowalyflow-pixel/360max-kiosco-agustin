@@ -1,0 +1,45 @@
+# ============================================================
+# 360MAX KIOSCO AGUSTÍN — Blueprint de Render
+# App: caja + stock (Node + SQLite). La raíz del repo contiene
+# server.js y package.json, por eso NO se usa rootDir.
+# ------------------------------------------------------------
+# PERSISTENCIA REAL: usa un Disco de Render montado en /var/data
+# y apunta DB_PATH ahí. Así los datos (productos, ventas, usuarios)
+# SOBREVIVEN a reinicios y deploys. NADA en memoria.
+# ============================================================
+databases: []
+services:
+  - type: web
+    name: 360max-kiosco-agustin
+    runtime: node
+    plan: starter
+    region: ohio
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # Persistencia: la base vive en el disco, no en memoria.
+      - key: DB_PATH
+        value: /var/data/360max.db
+      # Puerto que Render inyecta; server.js lo lee.
+      - key: PORT
+        value: "10000"
+      # Primer arranque: crea el admin con estas credenciales.
+      # Cambialas por las reales de Agustín antes del deploy.
+      - key: ADMIN_USUARIO
+        value: administrador
+      - key: ADMIN_NOMBRE
+        value: Agustín
+      - key: ADMIN_CLAVE
+        sync: false
+      # Sesión larga para el turno de trabajo.
+      - key: SESSION_HORAS
+        value: "12"
+

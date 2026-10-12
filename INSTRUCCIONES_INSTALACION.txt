@@ -1,0 +1,13 @@
+CHECKLIST RÁPIDO — 360MAX COMERCIOS (Drugstore Agustín)
+========================================================
+Carpeta del sistema: C:\Users\DIego\Desktop\agustin
+
+[ ] 1. Conectar el escáner de códigos de barras Nictom LCB8200W
+       ANTES de iniciar la app.
+[ ] 2. Ejecutar el instalador de dos clics:
+       doble clic en "agustin\Drugstore Agustin\Instalar una vez.lnk"
+       y esperar "INSTALACION EXITOSA".
+[ ] 3. Configurar los márgenes de ganancia por categoría para procesar
+       la lista de costos de Agustín (Administración > Categorías).
+[ ] 4. Iniciar el turno de caja cargando el fondo inicial para el cajero
+       ("Abrir Caja 360MAX.lnk" > ingresar > Caja > ABRIR CAJA).

@@ -1,0 +1,13 @@
+360MAX COMERCIOS - DRUGSTORE AGUSTIN
+=====================================
+
+PRIMERA VEZ (viernes, al instalar la PC de la caja):
+  1. Doble clic en "Instalar una vez.lnk".
+  2. Esperar que diga INSTALACION EXITOSA.
+
+TODOS LOS DIAS:
+  1. Doble clic en "Abrir Caja 360MAX.lnk".
+  2. El navegador abre solo en http://localhost:3000.
+  3. No cerrar la ventana minimizada "360MAX - Servidor (no cerrar)".
+
+Si algo falla: cerrar todo y volver a ejecutar "Instalar una vez".

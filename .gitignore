@@ -1,0 +1,20 @@
+node_modules/
+# Bases de datos locales (NUNCA subir)
+data/*.db
+data/*.db-shm
+data/*.db-wal
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+# Secretos y entorno (NUNCA subir)
+.env
+.env.*
+*.local
+# Temporales de sesión (salidas de chequeo y logs de git)
+*_out.txt
+check_demo.txt
+git_out.txt
+# accesos directos del kit de entrega (se regeneran con `npm run kit` en cada PC)
+Drugstore Agustin/*.lnk

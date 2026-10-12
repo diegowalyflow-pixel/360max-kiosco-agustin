@@ -1,0 +1,11 @@
+[ok] Kit completo: 17 archivos clave presentes.
+[ok] Abrir Caja 360MAX.lnk -> apunta a c:/Users/Diego/Desktop/agustin
+[ok] Instalar una vez.lnk -> apunta a c:/Users/Diego/Desktop/agustin
+[ok] DB sin historial de ventas (ventas/items/pagos/turnos/sesiones = 0).
+[ok] DB íntegra: quick_check=ok, 286 productos activos, 11 categorías con margen.
+[ok] INSTRUCCIONES_INSTALACION.txt en el Escritorio y dentro de agustin\.
+[ok] Temporales eliminados del proyecto: 22/22
+[ok] WAL consolidado en el .db principal
+[ok] data/360max.db limpio: sólo el .db principal (sin -wal/-shm).
+
+RESULTADO=OK

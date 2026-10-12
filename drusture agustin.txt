@@ -1,0 +1,4 @@
+function ir-agustin {
+    cd "C:\Users\DIego\.cline\data\workspaces\chat\360max-comercios"
+    code .
+}

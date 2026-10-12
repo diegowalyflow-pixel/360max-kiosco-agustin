@@ -1,0 +1,513 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>360MAX Comercios</title>
+<link rel="stylesheet" href="/estilo.css">
+<style id="estiloTicket">@page { size: 58mm auto; margin: 2mm; }</style>
+</head>
+<body>
+<header>
+  <div><strong>360MAX <span>COMERCIOS</span></strong><small>Ventas, caja y stock</small></div>
+  <div class="sesion-box"><span id="sesionUsuario" class="sesion-nombre" hidden></span><button id="salir" hidden>Cerrar sesión</button></div>
+</header>
+<main>
+<p id="mensaje" role="status" aria-live="polite"></p>
+
+<section id="acceso" class="tarjeta compacto">
+  <h1 id="tituloAcceso">Ingresar</h1>
+  <form id="login">
+    <label>Usuario<input name="usuario" required autocomplete="username" maxlength="50"></label>
+    <label id="nombreInicial" hidden>Nombre<input name="nombre" autocomplete="name"></label>
+    <label>Contraseña<input name="clave" type="password" required maxlength="128" autocomplete="current-password"></label>
+    <button>Continuar</button>
+  </form>
+</section>
+
+<div id="aplicacion" hidden>
+  <h1 id="bienvenida"></h1>
+  <nav id="navPrincipal">
+    <button data-vista="catalogo">Productos</button>
+    <button data-vista="pos" class="rol-caja">Caja</button>
+    <button data-vista="deposito" class="rol-deposito">Depósito</button>
+    <button data-vista="movimientos">Historial</button>
+    <button data-vista="gestion" class="administrador">Administración</button>
+  </nav>
+
+  <section id="catalogo">
+    <div id="indicadores" class="indicadores"></div>
+    <div class="tarjeta">
+      <label>Buscar producto<input id="buscar" type="search" placeholder="Escriba o escanee un código"></label>
+      <div id="lista" class="productos"></div>
+    </div>
+  </section>
+
+  <section id="pos" hidden>
+    <div id="apertura" class="tarjeta compacto apertura-card">
+      <h2>Abrir caja</h2>
+      <p class="ayuda">Ponga el fondo inicial para empezar el día.</p>
+      <dl class="datos-apertura">
+        <div><dt>Usuario</dt><dd id="aperturaUsuario"></dd></div>
+        <div><dt>Fecha y hora</dt><dd id="aperturaFecha"></dd></div>
+        <div><dt>Cierre anterior</dt><dd id="aperturaCierre" class="ayuda">—</dd></div>
+      </dl>
+      <form id="formApertura">
+        <label>Caja<select name="caja_id" id="aperturaCaja" required></select></label>
+        <label>Fondo inicial<input name="fondo" inputmode="decimal" value="0" required></label>
+        <button class="cobrar">ABRIR CAJA</button>
+      </form>
+    </div>
+
+    <div id="posPrincipal" hidden>
+      <div id="posEstado" class="tarjeta estado-turno"></div>
+      <nav id="posTabs" class="pos-tabs">
+        <button type="button" data-tab="vender" class="activo">Vender</button>
+        <button type="button" data-tab="arqueo">Cierre</button>
+        <button type="button" data-tab="devoluciones">Devoluciones</button>
+        <button type="button" data-tab="clientes">Clientes</button>
+      </nav>
+
+      <section id="posVender">
+        <div class="pos-grilla">
+          <div class="pos-izquierda">
+            <label class="pos-buscar">Buscar producto
+              <input id="posBuscar" type="search" placeholder="Escriba o escanee el código" autocomplete="off" inputmode="search">
+            </label>
+            <button type="button" id="posCamara" class="secundario mini">📷 Escanear</button>
+            <div id="posCategorias" class="chips" role="tablist" aria-label="Categorías de productos"></div>
+            <div id="posGrilla" class="pos-productos"></div>
+          </div>
+          <aside id="posCarrito" class="pos-carrito tarjeta">
+            <div class="pos-carrito-cabecera"><h2>Carrito</h2><button type="button" id="posCerrarCarrito" class="secundario mini cerrar-carrito" hidden>Cerrar ✕</button></div>
+            <div id="posItems" class="pos-items"></div>
+            <div class="pos-total"><small>Total</small><strong id="posTotal">$0</strong></div>
+            <button type="button" id="posCobrar" class="cobrar" disabled>COBRAR</button>
+            <button type="button" id="posVaciar" class="secundario">Vaciar carrito</button>
+            <button type="button" id="posReimprimir" class="secundario" hidden>🧾 Reimprimir último ticket</button>
+            <label class="imprimir-auto"><input type="checkbox" id="autoImprimir" checked> 🖨️ Imprimir ticket al cobrar</label>
+          </aside>
+        </div>
+        <div id="posBarra" class="pos-barra">
+          <button type="button" id="posAbrirCarrito">🛒 <span id="posBarraCant">0</span> en carrito</button>
+          <strong id="posBarraTotal">$0</strong>
+          <button type="button" id="posBarraCobrar" class="cobrar" disabled>COBRAR</button>
+        </div>
+      </section>
+
+      <section id="posArqueo" hidden>
+        <div class="arqueo-grilla">
+          <div class="tarjeta">
+            <h2>Resumen del turno</h2>
+            <div id="arqueoDatos" class="arqueo-datos"></div>
+            <div id="arqueoMedios"></div>
+            <div id="arqueoMovs"></div>
+            <form id="formMovCaja">
+              <h3>Movimiento de efectivo</h3>
+              <div class="fila">
+                <label>Tipo<select name="tipo" id="movTipo">
+                  <option value="ingreso">Ingreso (sobra, reintegro)</option>
+                  <option value="egreso">Egreso (retiro, gasto)</option>
+                </select></label>
+                <label>Importe<input name="importe" inputmode="decimal" required></label>
+              </div>
+              <label>Motivo<input name="motivo" required maxlength="500"></label>
+              <button class="secundario">Registrar movimiento</button>
+            </form>
+          </div>
+          <div class="tarjeta">
+            <h2>Cierre de caja</h2>
+            <div class="esperado"><small>EFECTIVO ESPERADO</small><strong id="arqueoEsperado">$0</strong>
+              <small class="ayuda">Lo calcula el sistema. No se puede cambiar.</small></div>
+            <h3>Conteo por denominaciones</h3>
+            <div id="arqueoConteo" class="conteo"></div>
+            <div class="conteo-totales">
+              <div><small>EFECTIVO CONTADO</small><strong id="arqueoContado">$0</strong></div>
+              <div><small>DIFERENCIA</small><strong id="arqueoDiferencia">$0</strong></div>
+            </div>
+            <label>Observaciones (obligatorias si hay diferencia)<textarea name="observaciones" id="arqueoObs" rows="2" maxlength="1000"></textarea></label>
+            <button type="button" id="arqueoCerrar" class="cobrar">CERRAR CAJA</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="posDevoluciones" hidden>
+        <div class="tarjeta">
+          <h2>Devoluciones</h2>
+          <p class="ayuda">La devolución queda guardada con la venta original.</p>
+          <form id="devBuscarForm" class="fila">
+            <label>N° de venta<input name="venta" inputmode="numeric" placeholder="Ej.: 12"></label>
+            <button type="button" id="devBuscarBtn">Buscar venta</button>
+          </form>
+          <h3>Ventas del turno</h3>
+          <div id="devLista" class="dev-lista"></div>
+          <div id="devDetalle" hidden></div>
+        </div>
+      </section>
+
+      <section id="posClientes" hidden>
+        <div class="arqueo-grilla">
+          <div class="tarjeta">
+            <h2>Clientes</h2>
+            <form id="cliNuevo" class="fila">
+              <label>Nombre<input name="nombre" required maxlength="120"></label>
+              <label>Teléfono<input name="telefono" maxlength="60"></label>
+              <button class="secundario">+ Nuevo cliente</button>
+            </form>
+            <label>Buscar cliente<input id="cliBuscar" type="search" placeholder="Nombre o teléfono"></label>
+            <div id="cliLista" class="cli-lista"></div>
+          </div>
+          <div class="tarjeta" id="cliPanel" hidden>
+            <h2 id="cliNombre"></h2>
+            <div id="cliDatos" class="arqueo-datos"></div>
+            <form id="cliPago">
+              <h3>Registrar pago del cliente (entra a caja como efectivo)</h3>
+              <div class="fila">
+                <label>Importe<input name="importe" inputmode="decimal" required></label>
+                <label>Motivo<input name="motivo" maxlength="300" required placeholder="Ej.: pago semanal"></label>
+              </div>
+              <button class="cobrar">REGISTRAR PAGO</button>
+            </form>
+            <h3>Estado de cuenta</h3>
+            <div id="cliMovs"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section id="deposito" hidden>
+    <nav id="depTabs" class="pos-tabs">
+      <button type="button" data-dep="entrada" class="activo">Ingreso</button>
+      <button type="button" data-dep="salida">Egreso</button>
+      <button type="button" data-dep="merma">Merma</button>
+      <button type="button" data-dep="ajuste">Ajuste</button>
+      <button type="button" data-dep="catalogo">Catálogo</button>
+      <button type="button" data-dep="historial">Historial</button>
+    </nav>
+    <div class="tarjeta" id="provCard"><h2>Proveedores</h2><div id="provLista" class="prov-lista"></div></div>
+
+    <section id="depEntrada" class="tarjeta">
+      <h2>Ingreso</h2>
+      <p class="ayuda">Compra recibida: sube el stock.</p>
+      <form id="depFormEntrada">
+        <label>Código de barras<input id="depCodigo" name="codigo_barra" inputmode="search" autocomplete="off" placeholder="Escanee o escriba el código"></label>
+        <button type="button" id="depCamara" class="secundario mini">📷 Escanear</button>
+        <small id="depCodigoAyuda" class="ayuda">Escanee el código: el producto queda elegido solo.</small>
+        <label>Producto<select name="sku_id" id="prodEntrada" required></select></label>
+        <div class="fila">
+          <label>Cantidad<input name="cantidad" inputmode="decimal" placeholder="Ej.: 5" required></label>
+          <label>Costo<input name="costo" inputmode="decimal" placeholder="Ej.: 9500" required></label>
+        </div>
+        <label>Proveedor<select name="proveedor_id" id="provEntrada" required></select></label>
+        <button type="button" id="provNuevoBtn" class="secundario mini">+ Proveedor</button>
+        <div class="fila" id="provNuevoFila" hidden>
+          <label>Proveedor nuevo<input id="provNuevoNombre" maxlength="120" placeholder="Nombre"></label>
+          <button type="button" id="provNuevoGuardar" class="secundario">Guardar</button>
+        </div>
+        <div class="fila">
+          <label>Lote<input name="lote" maxlength="100"></label>
+          <label>Vence<input name="vencimiento" type="date"></label>
+        </div>
+        <label>Nota<input name="observacion" maxlength="500"></label>
+        <button class="cobrar">GUARDAR INGRESO</button>
+      </form>
+    </section>
+
+    <section id="depSalida" hidden class="tarjeta">
+      <h2>Egreso</h2>
+      <p class="ayuda">Sale stock sin venta: rotura, pérdida o consumo.</p>
+      <form id="depFormSalida">
+        <label>Producto<select name="sku_id" id="prodSalida" required></select></label>
+        <label>Cantidad<input name="cantidad" inputmode="decimal" required></label>
+        <label>Motivo<select name="motivo" id="motivoSalida">
+          <option>Consumo interno</option><option>Rotura</option><option>Pérdida</option><option>Donación</option><option>Otro</option>
+        </select></label>
+        <label>Nota<input name="observacion" maxlength="500"></label>
+        <button class="cobrar">GUARDAR EGRESO</button>
+      </form>
+    </section>
+
+    <section id="depMerma" hidden class="tarjeta">
+      <h2>Merma</h2>
+      <p class="ayuda">Producto que se pierde, vence o se rompe.</p>
+      <form id="depFormMerma">
+        <label>Producto<select name="sku_id" id="prodMerma" required></select></label>
+        <label>Cantidad<input name="cantidad" inputmode="decimal" required></label>
+        <label>Motivo<select name="motivo" id="motivoMerma">
+          <option>Vencido</option><option>Deterioro</option><option>Rotura</option><option>Sospecha de robo</option><option>Otro</option>
+        </select></label>
+        <label>Nota<input name="observacion" maxlength="500"></label>
+        <button class="peligro">GUARDAR MERMA</button>
+      </form>
+    </section>
+
+    <section id="depAjuste" hidden class="tarjeta">
+      <h2>Ajuste</h2>
+      <p class="ayuda">Compare el stock del sistema con lo contado.</p>
+      <form id="depFormAjuste">
+        <label>Producto<select name="sku_id" id="prodAjuste" required></select></label>
+        <div class="fila ajuste-datos">
+          <div><small>Stock sistema</small><strong id="ajusteSistema">—</strong></div>
+          <div><small>Diferencia</small><strong id="ajusteDif">—</strong></div>
+        </div>
+        <label>Stock contado<input name="stock_fisico" inputmode="decimal" placeholder="Ej.: 9,5" required></label>
+        <label>Motivo<input name="motivo" required maxlength="500" placeholder="Ej.: conteo semanal"></label>
+        <label>Nota<input name="observacion" maxlength="500"></label>
+        <button class="cobrar">GUARDAR AJUSTE</button>
+      </form>
+    </section>
+
+    <section id="depCatalogo" hidden class="tarjeta">
+      <h2>Catálogo</h2>
+      <p class="ayuda">Productos por categoría con su stock.</p>
+      <div id="depChips" class="chips"></div>
+      <div id="depGrupos"></div>
+    </section>
+
+    <section id="depHistorial" hidden class="tarjeta">
+      <h2>Historial</h2>
+      <form id="depFiltros" class="fila">
+        <label>Tipo<select name="tipo" id="filtroTipo"><option value="">Todos</option></select></label>
+        <label>Producto<select name="sku_id" id="filtroProd"><option value="">Todos</option></select></label>
+        <label>Desde<input name="desde" type="date"></label>
+        <label>Hasta<input name="hasta" type="date"></label>
+        <button class="secundario">Filtrar</button>
+      </form>
+      <div id="depTabla" class="dep-tabla"></div>
+    </section>
+  </section>
+
+  <section id="movimientos" hidden class="tarjeta">
+    <h2>Historial de stock</h2>
+    <div id="historial"></div>
+  </section>
+
+  <section id="gestion" hidden>
+    <button type="button" id="vpBoton" class="cobrar" style="display:block; margin-bottom:14px;">📜 Ventas Pasadas</button>
+
+    <div class="tarjeta" id="tarjetaEspejo">
+      <div class="espejo-cabecera">
+        <h2>Espejo del local — control remoto</h2>
+        <button type="button" id="espejoRefrescar" class="mini secundario">🔄 Actualizar</button>
+      </div>
+      <p class="ayuda">Estado en vivo de la terminal del local: turno abierto con su arqueo corriente, ventas de hoy, últimas ventas y productos con stock bajo. Se refresca solo cada minuto.</p>
+      <div id="espejoContenido" class="espejo-contenido"><p class="ayuda">Cargando…</p></div>
+    </div>
+
+    <div class="grilla">
+      <div class="tarjeta">
+        <h2 id="tituloProducto">Nuevo producto</h2>
+        <form id="producto">
+          <input type="hidden" name="id">
+          <label>Nombre<input name="nombre" required maxlength="120"></label>
+          <div class="grilla">
+            <label>Categoría<select name="categoria_id" id="categoriaProducto"></select></label>
+            <label>Subcategoría<select name="subcategoria_id" id="subcategoriaProducto"></select></label>
+            <label>Unidad de stock y precio<select name="unidad" id="unidad">
+              <option value="UNIDAD">Unidad</option><option value="KG">Kilogramo (KG)</option>
+            </select></label>
+            <label>Código interno (opcional)<input name="codigo_interno" maxlength="80"></label>
+            <label>Código de barras (opcional)<input name="codigo_barra" maxlength="80" placeholder="Ej.: 7791234567890"></label>
+            <label>Costo<input name="costo" inputmode="decimal" value="0" required></label>
+            <label>Precio por unidad seleccionada<input name="precio" inputmode="decimal" required></label>
+            <label>Precio fijo (opcional)<input name="precio_fijo" id="precioFijo" inputmode="decimal" placeholder="Vacío = costo × margen del rubro"></label>
+            <label>Stock inicial<input name="stock_inicial" inputmode="decimal" value="0" required></label>
+            <label>Stock mínimo<input name="stock_minimo" inputmode="decimal" value="0" required></label>
+            <label id="filaVariantes" class="ayuda">Variantes (solo unidad) — ej.: Talle: S, M, L
+              <input name="variantes" maxlength="200" placeholder="Talle: S, M, L"></label>
+          </div>
+          <label><input type="checkbox" name="activo" checked style="display:inline;width:auto;margin-right:6px"> Producto activo</label>
+          <p class="ayuda">En KG escriba 0,350 para 350 gramos. El stock inicial queda registrado a su nombre.</p>
+          <p class="ayuda">Precio HÍBRIDO: si completás el «precio fijo» la caja cobra ese monto exacto; si lo dejás vacío, se calcula <b>costo × (1 + margen del rubro)</b>. El margen se ajusta más abajo, en «Precios por rubro».</p>
+          <button>Guardar producto</button>
+          <button type="button" id="nuevo" class="secundario">Limpiar formulario</button>
+        </form>
+        <div id="gestionLista" class="productos"></div>
+      </div>
+
+      <div>
+        <div class="tarjeta">
+          <h2>Categorías</h2>
+          <form id="categoria">
+            <label>Nombre<input name="nombre" required maxlength="120"></label>
+            <button>Crear categoría</button>
+          </form>
+          <h3>Subcategorías</h3>
+          <form id="subcategoria">
+            <label>Categoría<select name="categoria_id" id="categoriaSub" required></select></label>
+            <label>Nombre<input name="nombre" required maxlength="120"></label>
+            <button>Crear subcategoría</button>
+          </form>
+          <div id="arbol"></div>
+        </div>
+
+        <div class="tarjeta">
+          <h2>Usuarios</h2>
+          <form id="usuario">
+            <label>Nombre<input name="nombre" required></label>
+            <label>Usuario<input name="usuario" required maxlength="50" autocomplete="off"></label>
+            <label>Rol<select name="rol">
+              <option value="caja">Caja</option><option value="deposito">Depósito</option><option value="administrador">Administrador</option>
+            </select></label>
+            <label>Contraseña (10 caracteres mínimo)<input name="clave" type="password" required minlength="10" maxlength="128" autocomplete="new-password"></label>
+            <button>Crear usuario</button>
+          </form>
+          <div id="usuarios" class="usuarios-lista"></div>
+        </div>
+
+        <div class="tarjeta" id="tarjetaArqueos">
+          <h2>Arqueos históricos</h2>
+          <form id="arqFiltros" class="fila">
+            <label>Desde<input name="desde" type="date"></label>
+            <label>Hasta<input name="hasta" type="date"></label>
+            <button class="secundario">Filtrar</button>
+          </form>
+          <div id="arqLista" class="arq-lista"></div>
+          <div id="arqDetalle" hidden></div>
+        </div>
+
+        <div class="tarjeta" id="tarjetaVentas" hidden>
+          <h2>Ventas Pasadas</h2>
+          <p class="ayuda">Historial completo de ventas: filtre por fechas o vea todo el histórico.</p>
+          <form id="vpFiltros" class="fila">
+            <label>Desde<input name="desde" type="date"></label>
+            <label>Hasta<input name="hasta" type="date"></label>
+            <button class="secundario">Filtrar</button>
+            <button type="button" id="vpTodas" class="secundario">Histórico completo</button>
+          </form>
+          <p id="vpResumen" class="ayuda"></p>
+          <div id="vpTabla" class="dep-tabla"></div>
+        </div>
+
+        <div class="tarjeta">
+          <h2>Cambio de precios</h2>
+          <p class="ayuda">Suba o baje los precios con un porcentaje.</p>
+          <form id="preciosMasivo">
+            <div class="fila">
+              <label>Categoría<select name="categoria_id" id="catPrecios"><option value="">Todas las categorías</option></select></label>
+              <label>Porcentaje %<input name="porcentaje" inputmode="decimal" placeholder="10 sube / -5 baja" required></label>
+              <label>Redondeo a<select name="redondeo">
+                <option value="0">Sin redondeo</option><option value="10">$10</option>
+                <option value="50">$50</option><option value="100">$100</option>
+              </select></label>
+            </div>
+            <button class="peligro">APLICAR CAMBIO DE PRECIOS</button>
+          </form>
+        </div>
+
+        <div class="tarjeta" id="tarjetaPrecios">
+          <h2>Precios por rubro y precio fijo</h2>
+          <p class="ayuda">Dos niveles de precio: el <b>margen de ganancia del rubro</b> (se aplica sobre el costo) y el <b>precio fijo individual</b> de cada SKU (excepción manual que la caja cobra exacta).</p>
+
+          <h3>Margen de ganancia por categoría</h3>
+          <p class="ayuda">Porcentaje que se suma al costo para calcular el precio de venta cuando el producto no tiene precio fijo.</p>
+          <div id="margenesLista" class="margenes-lista"><p class="ayuda">Cargando…</p></div>
+
+          <h3>Buscar producto y fijar su precio</h3>
+          <p class="ayuda">Permite corregir el costo y «clavar» un precio final manual. Deje el precio fijo vacío para volver al margen del rubro.</p>
+          <label>Buscar<input id="precioBuscar" type="search" placeholder="Nombre o código de barras"></label>
+          <div id="precioResultados" class="precio-resultados"><p class="ayuda">Escriba un nombre o escanee un código.</p></div>
+        </div>
+
+        <div class="tarjeta">
+          <h2>Productos en Excel</h2>
+          <p class="ayuda">Descargue la lista, edite precios en Excel y vuelva a importar (CSV con «;» y coma decimal).</p>
+          <a class="secundario descarga" href="/api/productos/csv" download="360max-productos.csv">⬇️ Descargar lista CSV</a>
+          <label>Importar CSV<input type="file" id="csvArchivo" accept=".csv,text/csv"></label>
+          <button type="button" id="csvImportar" class="secundario">Importar / actualizar</button>
+          <div id="csvResultado" class="ayuda"></div>
+        </div>
+
+        <div class="tarjeta">
+          <h2>Cuentas corrientes</h2>
+          <div id="ctasLista" class="ctas-lista"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div><!-- /aplicacion -->
+
+<div id="modalFondo" hidden>
+  <div id="modalCobro" class="tarjeta modal" hidden>
+    <h2>Cobrar venta</h2>
+    <div class="modal-total"><small>Total a cobrar</small><strong id="cobroTotal">$0</strong></div>
+    <label>Cliente (para cuenta corriente)
+      <select id="cobroCliente"><option value="">— Sin cliente —</option></select></label>
+    <h3>Medios de pago</h3>
+    <div id="cobroPagos" class="cobros"></div>
+    <button type="button" id="cobroAgregar" class="secundario">+ Agregar otro medio de pago</button>
+    <p id="cobroPendiente" class="cobro-pendiente"></p>
+    <p id="cobroError" class="cobro-error" role="alert"></p>
+    <button type="button" id="cobroConfirmar" class="cobrar">CONFIRMAR COBRO</button>
+    <button type="button" id="cobroCancelar" class="secundario">Cancelar</button>
+  </div>
+
+  <div id="modalTicket" class="tarjeta modal" hidden>
+    <h2>✅ Venta registrada — Ticket <span id="ticketNum"></span></h2>
+    <div id="ticketVista" class="ticket-vista"></div>
+    <label>Ancho de papel
+      <select id="ticketAncho"><option value="58">58 mm (estándar)</option><option value="80">80 mm</option></select>
+    </label>
+    <button type="button" id="ticketImprimir" class="cobrar">🖨️ IMPRIMIR</button>
+    <button type="button" id="ticketCerrar" class="secundario">Nueva venta</button>
+  </div>
+
+  <div id="modalDevolucion" class="tarjeta modal" hidden>
+    <h2>Devolución de venta <span id="devVentaNum"></span></h2>
+    <div id="devProductos" class="dev-productos"></div>
+    <label>Motivo (obligatorio)<input id="devMotivo" maxlength="500" placeholder="Ej.: producto en mal estado"></label>
+    <label class="opcional"><input type="checkbox" id="devReintegro" checked style="display:inline;width:auto;margin-right:6px"> Reintegrar stock de los productos devueltos</label>
+    <p id="devResumen" class="ayuda"></p>
+    <button type="button" id="devConfirmar" class="cobrar">CONFIRMAR DEVOLUCIÓN</button>
+    <button type="button" id="devCancelar" class="secundario">Cancelar</button>
+  </div>
+
+  <div id="modalAnulacion" class="tarjeta modal" hidden>
+    <h2>Anular venta <span id="anulVentaNum"></span></h2>
+    <p class="ayuda">La venta no se borra. El stock vuelve al sistema.</p>
+    <label>Motivo (obligatorio)<input id="anulMotivo" maxlength="500" placeholder="Ej.: error de precio"></label>
+    <button type="button" id="anulConfirmar" class="peligro">ANULAR VENTA</button>
+    <button type="button" id="anulCancelar" class="secundario">Cancelar</button>
+  </div>
+
+  <div id="modalCamara" class="tarjeta modal" hidden>
+    <h2>Escanear código</h2>
+    <video id="camaraVideo" playsinline webkit-playsinline muted autoplay></video>
+    <button type="button" id="camaraIniciar" class="cobrar" hidden>▶ INICIAR VIDEO</button>
+    <p id="camaraEstado" class="ayuda" role="status" aria-live="polite"></p>
+    <label>Código leído<input id="camaraCodigo" inputmode="numeric" maxlength="40" placeholder="Escriba el código"></label>
+    <button type="button" id="camaraUsar" class="secundario">Buscar código</button>
+    <p class="ayuda">Apunte al código de barras. También sirve un lector USB.</p>
+    <button type="button" id="camaraCerrar" class="secundario">Cerrar</button>
+  </div>
+
+  <div id="modalCamaraDep" class="tarjeta modal" hidden>
+    <h2>Escanear código — Depósito</h2>
+    <video id="camaraDepVideo" playsinline webkit-playsinline muted autoplay></video>
+    <button type="button" id="camaraDepIniciar" class="cobrar" hidden>▶ INICIAR VIDEO</button>
+    <p id="camaraDepEstado" class="ayuda" role="status" aria-live="polite"></p>
+    <label>Código leído<input id="camaraDepCodigo" inputmode="numeric" maxlength="40" placeholder="Escriba el código"></label>
+    <button type="button" id="camaraDepUsar" class="secundario">Buscar código</button>
+    <p class="ayuda">Apunte al código de barras. También sirve un lector USB.</p>
+    <button type="button" id="camaraDepCerrar" class="secundario">Cerrar</button>
+  </div>
+</div>
+
+</main>
+
+<!-- Contenedor invisible del ticket térmico (hermano de main: impresible sin display:none) -->
+<div id="ticketImpresion" aria-hidden="true"></div>
+<!-- Contenedor invisible del reporte de cierre de caja (se imprime con window.print()) -->
+<div id="reporteImpresion" aria-hidden="true"></div>
+<script src="/app.js"></script>
+<script src="/caja.js"></script>
+<script src="/deposito.js"></script>
+<script src="/admin.js"></script>
+</body>
+</html>
+
+
+
+
+

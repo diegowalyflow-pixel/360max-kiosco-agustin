@@ -1,0 +1,15 @@
+CARPETA INSTALADORES - PROYECT360MAX
+====================================
+
+Aqui esta incluido el instalador de Node.js para la PC del cliente:
+
+  node-v24.19.0-x64.msi  (31 MB, funciona SIN internet)
+
+Es la MISMA version con la que se armo el kit (Node v24.19.0).
+
+Regla importante: si en tu maquina de desarrollo actualizas Node
+a otra version mayor (ej: v25), hay que:
+  1. Descargar el .msi de esa version desde nodejs.org/dist
+  2. Reemplazar el .msi de esta carpeta
+  3. Rehacer la copia de node_modules en el kit
+Si no, el sistema no arranca en la PC del cliente.
