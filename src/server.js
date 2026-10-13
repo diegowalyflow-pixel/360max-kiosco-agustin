@@ -33,7 +33,18 @@ function crearApp() {
   app.use(require('./routes/admin'));
 
   const PUBLIC = path.join(__dirname, '..', 'public');
-  app.use(express.static(PUBLIC));
+  // express.static sobreescribe el Cache-Control de arriba con "public, max-age=0".
+  // Con max-age=0 el navegador IGUAL muestra la pantalla rota cacheada. Acá le
+  // clavamos no-store a cada archivo estático: es la única forma de que el celu
+  // de Agustín no pueda reusar la versión vieja y cargue el login nuevo sí o sí.
+  app.use(express.static(PUBLIC, {
+    setHeaders: (res) => {
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      res.set('Surrogate-Control', 'no-store');
+    }
+  }));
 
   // Salud para el health check de Render (nunca debe dar 404).
   app.get(['/healthz', '/health'], (req, res) => res.status(200).json({ ok: true, ts: Date.now() }));
