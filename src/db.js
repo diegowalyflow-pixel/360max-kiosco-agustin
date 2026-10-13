@@ -231,6 +231,14 @@ CREATE TABLE IF NOT EXISTS movimientos_caja (
   motivo TEXT,
   fecha TEXT NOT NULL DEFAULT (datetime('now','localtime'))
 );
+CREATE TABLE IF NOT EXISTS auditoria (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  evento TEXT NOT NULL,
+  detalle TEXT,
+  usuario_id INTEGER REFERENCES usuarios(id),
+  fecha TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+);
+
 `;
 
 async function sembrarDatos() {
