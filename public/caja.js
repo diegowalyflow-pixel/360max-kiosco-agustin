@@ -349,15 +349,20 @@ document.addEventListener('DOMContentLoaded', () => {
     q('#cobroPagos').innerHTML = '';
     agregarFilaPago('efectivo', totalCarrito());
     recalcularPendiente();
-    /* Clientes (para cuenta corriente) */
+    /* El modal se abre YA (antes de cualquier await) para que nunca quede colgado
+       esperando la red. Antes se abría DESPUÉS de /api/clientes y si esa llamada
+       tardaba o colgaba, el cobro no aparecía nunca. */
+    mostrarModal('#modalCobro');
+    try {
+      const m = q('#cobroPagos').querySelector('.pago-monto');
+      if (m) { m.focus(); m.select(); }
+    } catch (e) { /* sin foco */ }
+    /* Clientes (para cuenta corriente) se cargan en segundo plano, sin bloquear el modal. */
     try {
       const clientes = await api('/api/clientes');
       q('#cobroCliente').innerHTML = '<option value="">— Sin cliente —</option>' +
         clientes.map((c) => `<option value="${c.id}">${esc(c.nombre)}</option>`).join('');
     } catch (e) { /* opcional */ }
-    mostrarModal('#modalCobro');
-    q('#cobroPagos').querySelector('.pago-monto').focus();
-    q('#cobroPagos').querySelector('.pago-monto').select();
   }
 
   q('#posCobrar').addEventListener('click', abrirCobro);
