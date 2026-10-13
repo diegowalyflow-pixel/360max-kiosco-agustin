@@ -50,14 +50,15 @@ function crearApp() {
   app.get(['/healthz', '/health'], (req, res) => res.status(200).json({ ok: true, ts: Date.now() }));
 
   // Raíz explícita: garantiza servir la pantalla de login en "/".
-  app.get('/', (req, res) => res.sendFile(path.join(PUBLIC, 'index.html')));
+  // cacheControl:false → Express NO pone su "public, max-age=0" (que pisaba el no-store).
+  app.get('/', (req, res) => res.sendFile(path.join(PUBLIC, 'index.html'), { cacheControl: false }));
 
   // API desconocida: 404 en JSON (no confunde al front con HTML en blanco).
   app.use('/api', (req, res) => res.status(404).json({ error: 'Ruta no encontrada.' }));
 
   // Fallback SPA: cualquier otra ruta GET sirve index.html. Así, entrar por un
   // sub-path (/caja, /admin, /deposito) NUNCA muestra "Cannot GET" en blanco.
-  app.get('*', (req, res) => res.sendFile(path.join(PUBLIC, 'index.html')));
+  app.get('*', (req, res) => res.sendFile(path.join(PUBLIC, 'index.html'), { cacheControl: false }));
   app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
     const status = err.status || 500;
     if (status >= 500) console.error('[360MAX]', err);
