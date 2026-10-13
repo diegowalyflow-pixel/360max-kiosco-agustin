@@ -4,8 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>360MAX Comercios</title>
-<link rel="stylesheet" href="/estilo.css">
+<link rel="stylesheet" href="/estilo.css?v=fixcache2">
 <style id="estiloTicket">@page { size: 58mm auto; margin: 2mm; }</style>
+<script>
+// Limpieza forzada de service workers viejos que pudieran servir la pantalla
+// rota en blanco desde caché. Se corre antes de todo.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function (rs) {
+    rs.forEach(function (r) { r.unregister(); });
+  });
+}
+</script>
 </head>
 <body>
 <header>
@@ -490,10 +499,10 @@
 <div id="ticketImpresion" aria-hidden="true"></div>
 <!-- Contenedor invisible del reporte de cierre de caja (se imprime con window.print()) -->
 <div id="reporteImpresion" aria-hidden="true"></div>
-<script src="/app.js"></script>
-<script src="/caja.js"></script>
-<script src="/deposito.js"></script>
-<script src="/admin.js"></script>
+<script src="/app.js?v=fixcache2"></script>
+<script src="/caja.js?v=fixcache2"></script>
+<script src="/deposito.js?v=fixcache2"></script>
+<script src="/admin.js?v=fixcache2"></script>
 </body>
 </html>
 

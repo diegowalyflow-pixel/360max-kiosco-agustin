@@ -13,6 +13,17 @@ function crearApp() {
   app.use(express.json({ limit: '4mb' }));
   app.use(cargarSesion);
 
+  // Anti-caché TOTAL: el navegador de Agustín tenía guardada la pantalla rota
+  // vieja y por eso veía blanco aunque el servidor ya estaba bien. Con esto el
+  // navegador NO puede reusar nada: pide todo de nuevo al servidor bueno.
+  app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.set('Surrogate-Control', 'no-store');
+    next();
+  });
+
   app.use(require('./routes/auth'));
   app.use(require('./routes/productos'));
   app.use(require('./routes/categorias'));
