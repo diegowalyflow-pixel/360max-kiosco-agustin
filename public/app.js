@@ -91,8 +91,10 @@ async function entrar(usuario) {
   $('#bienvenida').textContent = 'Hola, ' + usuario.nombre.split(' ')[0] + ' 👋';
   aplicarRoles(usuario.rol);
   aviso('', '');
-  await cargarCatalogo();
-  mostrarVista('catalogo');
+  /* Blindaje: el login YA fue validado en el backend. Si el catálogo o la vista
+     fallan por cualquier motivo, el usuario IGUAL entra (nunca queda trabado). */
+  try { await cargarCatalogo(); } catch (e) { aviso('Entraste, pero no se pudo cargar el catálogo: ' + e.message, 'error'); }
+  try { mostrarVista('catalogo'); } catch (e) { /* noop: la app ya quedó visible */ }
 }
 
 function esAdmin(rol) {
