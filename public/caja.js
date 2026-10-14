@@ -917,9 +917,12 @@ document.addEventListener('DOMContentLoaded', () => {
      ========================================================= */
   bus.addEventListener('vista', (ev) => {
     if (ev.detail !== 'pos') return;
-    recargarProductos()
-      .then(() => refrescarTurno())
-      .catch((e) => aviso(e.message, 'error'));
+    // NUNCA dejar la vista Caja en blanco: mostrar 'Abrir caja' al instante
+    // y desacoplar las dos cargas (productos y turno son independientes).
+    q('#apertura').hidden = false;
+    q('#posPrincipal').hidden = true;
+    recargarProductos().catch(() => {});
+    refrescarTurno().catch((e) => aviso(e.message || 'No se pudo cargar la caja', 'error'));
   });
   bus.addEventListener('productos', () => recargarProductos().catch(() => {}));
   pintarCarrito();
