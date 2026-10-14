@@ -3,17 +3,43 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>360MAX Comercios</title>
-<link rel="stylesheet" href="/estilo.css?v=fixcache2">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Drugstore Agustín · 360MAX</title>
+<link rel="stylesheet" href="/estilo.css?v=20261014a">
 <style id="estiloTicket">@page { size: 58mm auto; margin: 2mm; }</style>
 <script>
-// Limpieza forzada de service workers viejos que pudieran servir la pantalla
-// rota en blanco desde caché. Se corre antes de todo.
+// Marca de versión del frente. Si el navegador guardó la pantalla vieja rota,
+// app.js (nuevo) la detecta, limpia caché y recarga al login bueno.
+// Así el cliente NUNCA tiene que "abrir incógnito": se arregla solo.
+window.__FRENTE_VERSION = '20261014a';
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(function (rs) {
     rs.forEach(function (r) { r.unregister(); });
   });
 }
+// Auto-reparación de caché vieja (el cliente NUNCA abre incógnito):
+// pregunta al servidor cuál es la versión actual y si este HTML es más viejo,
+// limpia cachés y recarga UNA vez al login bueno. A prueba de futuras versiones.
+(function () {
+  try {
+    var YO = window.__FRENTE_VERSION || 'vieja';
+    if (sessionStorage.getItem('360max_recarga_' + YO)) return;
+    fetch('/?_ver=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' }).then(function (r) {
+      return r.text();
+    }).then(function (html) {
+      var m = html.match(/__FRENTE_VERSION\s*=\s*'([^']+)'/);
+      if (!m || m[1] === YO) return;
+      try { sessionStorage.setItem('360max_recarga_' + YO, '1'); } catch (e) {}
+      if ('caches' in window) {
+        caches.keys().then(function (ks) {
+          ks.forEach(function (k) { caches.delete(k); });
+        }).finally(function () { location.reload(true); });
+      } else { location.reload(true); }
+    }).catch(function () { /* sin red: no molesta */ });
+  } catch (e) { /* noop */ }
+})();
 </script>
 </head>
 <body>
@@ -499,10 +525,10 @@ if ('serviceWorker' in navigator) {
 <div id="ticketImpresion" aria-hidden="true"></div>
 <!-- Contenedor invisible del reporte de cierre de caja (se imprime con window.print()) -->
 <div id="reporteImpresion" aria-hidden="true"></div>
-<script src="/app.js?v=fixcache2"></script>
-<script src="/caja.js?v=fixcache2"></script>
-<script src="/deposito.js?v=fixcache2"></script>
-<script src="/admin.js?v=fixcache2"></script>
+<script src="/app.js?v=20261014a"></script>
+<script src="/caja.js?v=20261014a"></script>
+<script src="/deposito.js?v=20261014a"></script>
+<script src="/admin.js?v=20261014a"></script>
 </body>
 </html>
 
