@@ -5,7 +5,7 @@
 */
 const express = require('express');
 const { db } = require('../db');
-const { exigirSesion, exigirRol, esAdmin } = require('../middleware/auth');
+const { exigirSesion, exigirRol, esAdmin, normalizarRol } = require('../middleware/auth');
 const { atender } = require('../lib/http');
 const { precioEfectivoPesos } = require('../lib/precios');
 
@@ -162,9 +162,10 @@ router.get('/api/ventas', exigirSesion, atender(async (req, res) => {
   const esHistorial = historial === '1' || historial === 'true' || Boolean(desde) || Boolean(hasta);
 
   if (esHistorial) {
-    if (!esAdmin(req.usuario.rol)) throw error(403, 'El historial de ventas es solo para administradores.');
+    const esAdm = esAdmin(req.usuario.rol);
     const cond = [];
     const valores = [];
+    if (!esAdm) { cond.push('v.usuario_id = ?'); valores.push(req.usuario.id); }
     if (desde) { cond.push('date(v.fecha) >= date(?)'); valores.push(desde); }
     if (hasta) { cond.push('date(v.fecha) <= date(?)'); valores.push(hasta); }
     const ventas = await db.prepare(`

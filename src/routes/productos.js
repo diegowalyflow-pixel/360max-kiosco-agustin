@@ -100,7 +100,7 @@ async function verificarBarraLibre(codigoBarra, idPropio) {
   }
 }
 
-router.post('/api/productos', exigirRol('caja', 'deposito'), atender(async (req, res) => {
+router.post('/api/productos', exigirRol('deposito'), atender(async (req, res) => {
   const p = cuerpoAProducto(req.body || {});
   await verificarBarraLibre(p.codigo_barra, null);
   const stockInicial = Number.isFinite(Number((req.body || {}).stock_inicial))
@@ -121,7 +121,7 @@ router.post('/api/productos', exigirRol('caja', 'deposito'), atender(async (req,
 }));
 
 /* ---------- Edición y baja lógica ---------- */
-router.put('/api/productos/:id', exigirRol('caja', 'deposito'), atender(async (req, res) => {
+router.put('/api/productos/:id', exigirRol('deposito'), atender(async (req, res) => {
   const id = Number(req.params.id);
   const actual = await db.prepare('SELECT * FROM productos WHERE id = ?').get(id);
   if (!actual) return res.status(404).json({ error: 'Producto inexistente.' });
@@ -147,7 +147,7 @@ router.put('/api/productos/:id', exigirRol('caja', 'deposito'), atender(async (r
 }));
 
 /* Baja lógica: conserva el histórico de stock y ventas. */
-router.delete('/api/productos/:id', exigirRol('caja', 'deposito'), atender(async (req, res) => {
+router.delete('/api/productos/:id', exigirRol('deposito'), atender(async (req, res) => {
   const id = Number(req.params.id);
   const r = await db.prepare('UPDATE productos SET activo = 0, actualizado = datetime(\'now\',\'localtime\') WHERE id = ?').run(id);
   if (!r.changes) return res.status(404).json({ error: 'Producto inexistente.' });
@@ -180,7 +180,7 @@ router.get('/api/productos/csv', exigirSesion, atender(async (req, res) => {
 }));
 
 /* ---------- Importar CSV desde la vista de Administración ---------- */
-router.post('/api/productos/importar', exigirRol('caja', 'deposito'), atender(async (req, res) => {
+router.post('/api/productos/importar', exigirRol('deposito'), atender(async (req, res) => {
   const { texto, separador, actualizar_stock } = req.body || {};
   if (!texto) return res.status(400).json({ error: 'No se recibió contenido CSV.' });
   const filas = parseCSV(texto, separador);

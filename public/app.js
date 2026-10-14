@@ -61,6 +61,7 @@ function mostrarLogin(primerUso) {
   $('#acceso').hidden = false;
   $('#tituloAcceso').textContent = 'Ingresar';
   $('#salir').hidden = true;
+  $('#miClave').hidden = true;
   $('#sesionUsuario').hidden = true;
   sesion = null;
 }
@@ -86,6 +87,7 @@ async function entrar(usuario) {
   $('#aplicacion').hidden = false;
   try { localStorage.setItem('360max_sesion', JSON.stringify(usuario)); } catch (e) { /* noop */ }
   $('#salir').hidden = false;
+  $('#miClave').hidden = false;
   $('#sesionUsuario').hidden = false;
   $('#sesionUsuario').textContent = usuario.nombre + ' · ' + rolTexto(usuario.rol);
   $('#bienvenida').textContent = 'Hola, ' + usuario.nombre.split(' ')[0] + ' 👋';
@@ -94,7 +96,8 @@ async function entrar(usuario) {
   /* Blindaje: el login YA fue validado en el backend. Si el catálogo o la vista
      fallan por cualquier motivo, el usuario IGUAL entra (nunca queda trabado). */
   try { await cargarCatalogo(); } catch (e) { aviso('Entraste, pero no se pudo cargar el catálogo: ' + e.message, 'error'); }
-  try { mostrarVista('catalogo'); } catch (e) { /* noop: la app ya quedó visible */ }
+  /* Cada rol entra a SU vista: caja → Caja directo, resto → Productos. */
+  try { mostrarVista(sesion && normalizarRol(sesion.rol) === 'caja' ? 'pos' : 'catalogo'); } catch (e) { /* noop: la app ya quedó visible */ }
 }
 
 function esAdmin(rol) {
@@ -117,17 +120,44 @@ function aplicarRoles(rol) {
     /* SUPERUSUARIO: todo visible — Caja, Depósito, Administración, cierre, cobro */
     $$('.rol-caja, .rol-deposito, .administrador').forEach((e) => { e.hidden = false; });
     $$('#navPrincipal button').forEach((e) => { e.hidden = false; });
-    return;
+    return 'catalogo';
   }
   $$('.rol-caja').forEach((e) => { e.hidden = r !== 'caja'; });
   $$('.rol-deposito').forEach((e) => { e.hidden = r !== 'deposito'; });
   $$('.administrador').forEach((e) => { e.hidden = true; });
+  /* CAJA: solo Caja + historial de sus propias ventas. Sin Productos,
+     sin Depósito, sin Administración, sin movimientos globales. */
+  if (r === 'caja') {
+    $$('#navPrincipal button').forEach((e) => {
+      e.hidden = e.dataset.vista !== 'pos';
+    });
+    return 'pos';
+  }
+  /* DEPÓSITO: Productos + Depósito + Historial. Sin Caja, sin Administración. */
+  $$('#navPrincipal button').forEach((e) => {
+    e.hidden = (e.dataset.vista === 'pos' || e.dataset.vista === 'gestion');
+  });
+  return 'catalogo';
 }
 window.esAdmin = esAdmin;
 window.normalizarRol = normalizarRol;
 
-/* ---------- Navegación entre vistas ---------- */
+/* ---------- Navegación entre vistas (con guardián por rol) ---------- */
+const VISTAS_POR_ROL = {
+  administrador: ['catalogo', 'pos', 'deposito', 'movimientos', 'gestion'],
+  caja: ['pos'],
+  deposito: ['catalogo', 'deposito', 'movimientos']
+};
+function vistasPermitidas() {
+  const r = sesion ? normalizarRol(sesion.rol) : null;
+  if (esAdmin(r)) return VISTAS_POR_ROL.administrador;
+  return VISTAS_POR_ROL[r] || [];
+}
 function mostrarVista(nombre) {
+  /* Guardián: un usuario caja NUNCA entra a depósito/admin aunque lo llame
+     directo; se lo devuelve a su vista sin romper nada. */
+  const permitidas = vistasPermitidas();
+  if (permitidas.length && !permitidas.includes(nombre)) nombre = permitidas[0];
   ['catalogo', 'pos', 'deposito', 'movimientos', 'gestion'].forEach((v) => {
     const s = document.getElementById(v);
     if (s) s.hidden = v !== nombre;
@@ -251,6 +281,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!confirm('¿Cerrar sesión? Se limpiará la sesión actual.')) return;
     try { await api('/api/auth/logout', { method: 'POST', body: {} }); } catch (e) { /* la cookie se limpia igual */}
     salirUI(true);
+  });
+
+  /* Mi contraseña: cada usuario pone la suya (actual + nueva de 10+). */
+  const btnClave = $('#miClave');
+  if (btnClave) btnClave.addEventListener('click', () => {
+    $('#miClaveError').textContent = '';
+    $('#modalFondoClave').hidden = false;
+    const f = $('#formMiClave'); if (f) f.reset();
+    const primer = $('#formMiClave [name="actual"]'); if (primer) primer.focus();
+  });
+  const btnClaveCerrar = $('#miClaveCerrar');
+  if (btnClaveCerrar) btnClaveCerrar.addEventListener('click', () => {
+    $('#modalFondoClave').hidden = true;
+  });
+  const formClave = $('#formMiClave');
+  if (formClave) formClave.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const fd = new FormData(ev.target);
+    const nueva = String(fd.get('nueva') || '');
+    const repetir = String(fd.get('repetir') || '');
+    if (nueva !== repetir) { $('#miClaveError').textContent = 'La nueva contraseña y su repetición no coinciden.'; return; }
+    try {
+      const r = await api('/api/auth/clave', { method: 'POST', body: { actual: fd.get('actual'), nueva } });
+      ev.target.reset();
+      $('#modalFondoClave').hidden = true;
+      aviso(r.mensaje || 'Contraseña actualizada.', 'ok');
+    } catch (e) { $('#miClaveError').textContent = e.message; }
   });
 
   $$('#navPrincipal button').forEach((b) =>

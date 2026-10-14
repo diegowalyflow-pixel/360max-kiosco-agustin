@@ -264,7 +264,6 @@ async function sembrarDatos() {
     // Credenciales del administrador tomadas del entorno (producción).
     // Si no se define ADMIN_CLAVE, se genera una robusta de un solo uso y se
     // muestra UNA sola vez en el log (nunca queda un "admin"/"123" conocido).
-    const salt = 'seed_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
     const adminUsuario = process.env.ADMIN_USUARIO || 'agustin';
     const adminNombre = process.env.ADMIN_NOMBRE || 'Agustín';
     let adminClave = process.env.ADMIN_CLAVE || '';
@@ -273,7 +272,7 @@ async function sembrarDatos() {
       adminClave = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2).toUpperCase();
       claveTemporal = true;
     }
-    const hash = nuevaClave(adminClave, salt);
+    const { salt, hash } = nuevaClave(adminClave);
     await ejecutarCrudo(
       "INSERT INTO usuarios (nombre, usuario, rol, clave_hash, clave_salt) VALUES (?, ?, 'administrador', ?, ?)",
       [adminNombre, adminUsuario, hash, salt]

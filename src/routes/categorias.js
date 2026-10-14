@@ -15,7 +15,7 @@ router.get('/api/categorias', exigirSesion, atender(async (req, res) => {
   })));
 }));
 
-router.post('/api/categorias', exigirRol('caja', 'deposito'), atender(async (req, res) => {
+router.post('/api/categorias', exigirRol('deposito'), atender(async (req, res) => {
   const cuerpo = req.body || {};
   const nombre = String(cuerpo.nombre || '').trim();
   if (!nombre) return res.status(400).json({ error: 'Ingresá el nombre de la categoría.' });
@@ -48,7 +48,7 @@ router.put('/api/categorias/:id/margen', exigirRol(), atender(async (req, res) =
   res.json(await db.prepare('SELECT * FROM categorias WHERE id = ?').get(id));
 }));
 
-router.delete('/api/categorias/:id', exigirRol('caja', 'deposito'), atender(async (req, res) => {
+router.delete('/api/categorias/:id', exigirRol('deposito'), atender(async (req, res) => {
   const id = Number(req.params.id);
   const enUso = (await db.prepare('SELECT COUNT(*) n FROM productos WHERE categoria_id = ?').get(id)).n;
   if (enUso) return res.status(409).json({ error: `No se puede borrar: hay ${enUso} producto(s) en esta categoría.` });
@@ -56,7 +56,7 @@ router.delete('/api/categorias/:id', exigirRol('caja', 'deposito'), atender(asyn
   res.json({ ok: true });
 }));
 
-router.post('/api/subcategorias', exigirRol('caja', 'deposito'), atender(async (req, res) => {
+router.post('/api/subcategorias', exigirRol('deposito'), atender(async (req, res) => {
   const { categoria_id, nombre } = req.body || {};
   const n = String(nombre || '').trim();
   if (!categoria_id || !n) return res.status(400).json({ error: 'Categoría y nombre son obligatorios.' });

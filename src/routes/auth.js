@@ -93,6 +93,22 @@ router.post('/api/auth/continuar', atender(async (req, res) => {
   res.json({ mensaje: '¡Hola de nuevo, ' + u.nombre.split(' ')[0] + '!', usuario: { id: u.id, nombre: u.nombre, usuario: u.usuario, rol: (u.usuario === 'administrador' ? 'administrador' : normalizarRol(u.rol)) } });
 }));
 
+router.post('/api/auth/clave', exigirSesion, atender(async (req, res) => {
+  const actual = String((req.body || {}).actual || '');
+  const nueva = String((req.body || {}).nueva || '');
+  if (!actual || !nueva) return res.status(400).json({ error: 'Ingresá tu clave actual y la nueva.' });
+  if (nueva.length < 10) return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 10 caracteres.' });
+  const u = await db.prepare('SELECT * FROM usuarios WHERE id = ?').get(req.usuario.id);
+  if (!u || !verificarClave(u.usuario, actual, u.clave_salt, u.clave_hash)) {
+    return res.status(401).json({ error: 'Tu clave actual no es correcta.' });
+  }
+  const { salt, hash } = nuevaClave(nueva);
+  await db.prepare('UPDATE usuarios SET clave_hash = ?, clave_salt = ? WHERE id = ?').run(hash, salt, u.id);
+  await db.prepare("INSERT INTO auditoria (evento, detalle, usuario_id) VALUES ('clave_cambiada', ?, ?)")
+    .run('El usuario cambió su propia contraseña.', u.id);
+  res.json({ ok: true, mensaje: 'Contraseña actualizada.' });
+}));
+
 router.post('/api/auth/logout', exigirSesion, atender(async (req, res) => {
   await destruirSesion(req.token);
   borrarCookie(res);

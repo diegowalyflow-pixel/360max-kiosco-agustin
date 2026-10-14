@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -6,22 +6,22 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Drugstore Agustín · 360MAX</title>
-<link rel="stylesheet" href="/estilo.css?v=20261014a">
+<title>Drugstore Agust�n � 360MAX</title>
+<link rel="stylesheet" href="/estilo.css?v=20261014b">
 <style id="estiloTicket">@page { size: 58mm auto; margin: 2mm; }</style>
 <script>
-// Marca de versión del frente. Si el navegador guardó la pantalla vieja rota,
-// app.js (nuevo) la detecta, limpia caché y recarga al login bueno.
-// Así el cliente NUNCA tiene que "abrir incógnito": se arregla solo.
-window.__FRENTE_VERSION = '20261014a';
+// Marca de versi�n del frente. Si el navegador guard� la pantalla vieja rota,
+// app.js (nuevo) la detecta, limpia cach� y recarga al login bueno.
+// As� el cliente NUNCA tiene que "abrir inc�gnito": se arregla solo.
+window.__FRENTE_VERSION = '20261014b';
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(function (rs) {
     rs.forEach(function (r) { r.unregister(); });
   });
 }
-// Auto-reparación de caché vieja (el cliente NUNCA abre incógnito):
-// pregunta al servidor cuál es la versión actual y si este HTML es más viejo,
-// limpia cachés y recarga UNA vez al login bueno. A prueba de futuras versiones.
+// Auto-reparaci�n de cach� vieja (el cliente NUNCA abre inc�gnito):
+// pregunta al servidor cu�l es la versi�n actual y si este HTML es m�s viejo,
+// limpia cach�s y recarga UNA vez al login bueno. A prueba de futuras versiones.
 (function () {
   try {
     var YO = window.__FRENTE_VERSION || 'vieja';
@@ -45,8 +45,22 @@ if ('serviceWorker' in navigator) {
 <body>
 <header>
   <div><strong>360MAX <span>COMERCIOS</span></strong><small>Ventas, caja y stock</small></div>
-  <div class="sesion-box"><span id="sesionUsuario" class="sesion-nombre" hidden></span><button id="salir" hidden>Cerrar sesión</button></div>
+  <div class="sesion-box"><span id="sesionUsuario" class="sesion-nombre" hidden></span><button id="miClave" hidden>Mi clave</button><button id="salir" hidden>Cerrar sesi�n</button></div>
 </header>
+<div id="modalFondoClave" hidden>
+  <div class="tarjeta modal" role="dialog" aria-label="Cambiar mi contrase�a">
+    <h2>Mi contrase�a</h2>
+    <p class="ayuda">M�nimo 10 caracteres. Te pedimos la actual para confirmar que sos vos.</p>
+    <form id="formMiClave">
+      <label>Contrase�a actual<input name="actual" type="password" required maxlength="128" autocomplete="current-password"></label>
+      <label>Nueva contrase�a<input name="nueva" type="password" required minlength="10" maxlength="128" autocomplete="new-password"></label>
+      <label>Repetir nueva<input name="repetir" type="password" required minlength="10" maxlength="128" autocomplete="new-password"></label>
+      <p id="miClaveError" class="cobro-error" role="alert"></p>
+      <button class="cobrar">GUARDAR NUEVA CONTRASE�A</button>
+      <button type="button" id="miClaveCerrar" class="secundario">Cancelar</button>
+    </form>
+  </div>
+</div>
 <main>
 <p id="mensaje" role="status" aria-live="polite"></p>
 
@@ -54,7 +68,7 @@ if ('serviceWorker' in navigator) {
   <h1 id="tituloAcceso">Ingresar</h1>
   <form id="login">
     <label>Usuario<input name="usuario" required autocomplete="username" maxlength="50"></label>
-    <label>Contraseña<input name="clave" type="password" required maxlength="128" autocomplete="current-password"></label>
+    <label>Contrase�a<input name="clave" type="password" required maxlength="128" autocomplete="current-password"></label>
     <button>Continuar</button>
   </form>
 </section>
@@ -64,15 +78,15 @@ if ('serviceWorker' in navigator) {
   <nav id="navPrincipal">
     <button data-vista="catalogo">Productos</button>
     <button data-vista="pos" class="rol-caja">Caja</button>
-    <button data-vista="deposito" class="rol-deposito">Depósito</button>
+    <button data-vista="deposito" class="rol-deposito">Dep�sito</button>
     <button data-vista="movimientos">Historial</button>
-    <button data-vista="gestion" class="administrador">Administración</button>
+    <button data-vista="gestion" class="administrador">Administraci�n</button>
   </nav>
 
   <section id="catalogo">
     <div id="indicadores" class="indicadores"></div>
     <div class="tarjeta">
-      <label>Buscar producto<input id="buscar" type="search" placeholder="Escriba o escanee un código"></label>
+      <label>Buscar producto<input id="buscar" type="search" placeholder="Escriba o escanee un c�digo"></label>
       <div id="lista" class="productos"></div>
     </div>
   </section>
@@ -80,11 +94,11 @@ if ('serviceWorker' in navigator) {
   <section id="pos" hidden>
     <div id="apertura" class="tarjeta compacto apertura-card">
       <h2>Abrir caja</h2>
-      <p class="ayuda">Ponga el fondo inicial para empezar el día.</p>
+      <p class="ayuda">Ponga el fondo inicial para empezar el d�a.</p>
       <dl class="datos-apertura">
         <div><dt>Usuario</dt><dd id="aperturaUsuario"></dd></div>
         <div><dt>Fecha y hora</dt><dd id="aperturaFecha"></dd></div>
-        <div><dt>Cierre anterior</dt><dd id="aperturaCierre" class="ayuda">—</dd></div>
+        <div><dt>Cierre anterior</dt><dd id="aperturaCierre" class="ayuda">�</dd></div>
       </dl>
       <form id="formApertura">
         <label>Caja<select name="caja_id" id="aperturaCaja" required></select></label>
@@ -106,24 +120,24 @@ if ('serviceWorker' in navigator) {
         <div class="pos-grilla">
           <div class="pos-izquierda">
             <label class="pos-buscar">Buscar producto
-              <input id="posBuscar" type="search" placeholder="Escriba o escanee el código" autocomplete="off" inputmode="search">
+              <input id="posBuscar" type="search" placeholder="Escriba o escanee el c�digo" autocomplete="off" inputmode="search">
             </label>
-            <button type="button" id="posCamara" class="secundario mini">📷 Escanear</button>
-            <div id="posCategorias" class="chips" role="tablist" aria-label="Categorías de productos"></div>
+            <button type="button" id="posCamara" class="secundario mini">?? Escanear</button>
+            <div id="posCategorias" class="chips" role="tablist" aria-label="Categor�as de productos"></div>
             <div id="posGrilla" class="pos-productos"></div>
           </div>
           <aside id="posCarrito" class="pos-carrito tarjeta">
-            <div class="pos-carrito-cabecera"><h2>Carrito</h2><button type="button" id="posCerrarCarrito" class="secundario mini cerrar-carrito" hidden>Cerrar ✕</button></div>
+            <div class="pos-carrito-cabecera"><h2>Carrito</h2><button type="button" id="posCerrarCarrito" class="secundario mini cerrar-carrito" hidden>Cerrar ?</button></div>
             <div id="posItems" class="pos-items"></div>
             <div class="pos-total"><small>Total</small><strong id="posTotal">$0</strong></div>
             <button type="button" id="posCobrar" class="cobrar" disabled>COBRAR</button>
             <button type="button" id="posVaciar" class="secundario">Vaciar carrito</button>
-            <button type="button" id="posReimprimir" class="secundario" hidden>🧾 Reimprimir último ticket</button>
-            <label class="imprimir-auto"><input type="checkbox" id="autoImprimir" checked> 🖨️ Imprimir ticket al cobrar</label>
+            <button type="button" id="posReimprimir" class="secundario" hidden>?? Reimprimir �ltimo ticket</button>
+            <label class="imprimir-auto"><input type="checkbox" id="autoImprimir" checked> ??? Imprimir ticket al cobrar</label>
           </aside>
         </div>
         <div id="posBarra" class="pos-barra">
-          <button type="button" id="posAbrirCarrito">🛒 <span id="posBarraCant">0</span> en carrito</button>
+          <button type="button" id="posAbrirCarrito">?? <span id="posBarraCant">0</span> en carrito</button>
           <strong id="posBarraTotal">$0</strong>
           <button type="button" id="posBarraCobrar" class="cobrar" disabled>COBRAR</button>
         </div>
@@ -168,9 +182,9 @@ if ('serviceWorker' in navigator) {
       <section id="posDevoluciones" hidden>
         <div class="tarjeta">
           <h2>Devoluciones</h2>
-          <p class="ayuda">La devolución queda guardada con la venta original.</p>
+          <p class="ayuda">La devoluci�n queda guardada con la venta original.</p>
           <form id="devBuscarForm" class="fila">
-            <label>N° de venta<input name="venta" inputmode="numeric" placeholder="Ej.: 12"></label>
+            <label>N� de venta<input name="venta" inputmode="numeric" placeholder="Ej.: 12"></label>
             <button type="button" id="devBuscarBtn">Buscar venta</button>
           </form>
           <h3>Ventas del turno</h3>
@@ -185,10 +199,10 @@ if ('serviceWorker' in navigator) {
             <h2>Clientes</h2>
             <form id="cliNuevo" class="fila">
               <label>Nombre<input name="nombre" required maxlength="120"></label>
-              <label>Teléfono<input name="telefono" maxlength="60"></label>
+              <label>Tel�fono<input name="telefono" maxlength="60"></label>
               <button class="secundario">+ Nuevo cliente</button>
             </form>
-            <label>Buscar cliente<input id="cliBuscar" type="search" placeholder="Nombre o teléfono"></label>
+            <label>Buscar cliente<input id="cliBuscar" type="search" placeholder="Nombre o tel�fono"></label>
             <div id="cliLista" class="cli-lista"></div>
           </div>
           <div class="tarjeta" id="cliPanel" hidden>
@@ -216,7 +230,7 @@ if ('serviceWorker' in navigator) {
       <button type="button" data-dep="salida">Egreso</button>
       <button type="button" data-dep="merma">Merma</button>
       <button type="button" data-dep="ajuste">Ajuste</button>
-      <button type="button" data-dep="catalogo">Catálogo</button>
+      <button type="button" data-dep="catalogo">Cat�logo</button>
       <button type="button" data-dep="historial">Historial</button>
     </nav>
     <div class="tarjeta" id="provCard"><h2>Proveedores</h2><div id="provLista" class="prov-lista"></div></div>
@@ -225,9 +239,9 @@ if ('serviceWorker' in navigator) {
       <h2>Ingreso</h2>
       <p class="ayuda">Compra recibida: sube el stock.</p>
       <form id="depFormEntrada">
-        <label>Código de barras<input id="depCodigo" name="codigo_barra" inputmode="search" autocomplete="off" placeholder="Escanee o escriba el código"></label>
-        <button type="button" id="depCamara" class="secundario mini">📷 Escanear</button>
-        <small id="depCodigoAyuda" class="ayuda">Escanee el código: el producto queda elegido solo.</small>
+        <label>C�digo de barras<input id="depCodigo" name="codigo_barra" inputmode="search" autocomplete="off" placeholder="Escanee o escriba el c�digo"></label>
+        <button type="button" id="depCamara" class="secundario mini">?? Escanear</button>
+        <small id="depCodigoAyuda" class="ayuda">Escanee el c�digo: el producto queda elegido solo.</small>
         <label>Producto<select name="sku_id" id="prodEntrada" required></select></label>
         <div class="fila">
           <label>Cantidad<input name="cantidad" inputmode="decimal" placeholder="Ej.: 5" required></label>
@@ -250,12 +264,12 @@ if ('serviceWorker' in navigator) {
 
     <section id="depSalida" hidden class="tarjeta">
       <h2>Egreso</h2>
-      <p class="ayuda">Sale stock sin venta: rotura, pérdida o consumo.</p>
+      <p class="ayuda">Sale stock sin venta: rotura, p�rdida o consumo.</p>
       <form id="depFormSalida">
         <label>Producto<select name="sku_id" id="prodSalida" required></select></label>
         <label>Cantidad<input name="cantidad" inputmode="decimal" required></label>
         <label>Motivo<select name="motivo" id="motivoSalida">
-          <option>Consumo interno</option><option>Rotura</option><option>Pérdida</option><option>Donación</option><option>Otro</option>
+          <option>Consumo interno</option><option>Rotura</option><option>P�rdida</option><option>Donaci�n</option><option>Otro</option>
         </select></label>
         <label>Nota<input name="observacion" maxlength="500"></label>
         <button class="cobrar">GUARDAR EGRESO</button>
@@ -282,8 +296,8 @@ if ('serviceWorker' in navigator) {
       <form id="depFormAjuste">
         <label>Producto<select name="sku_id" id="prodAjuste" required></select></label>
         <div class="fila ajuste-datos">
-          <div><small>Stock sistema</small><strong id="ajusteSistema">—</strong></div>
-          <div><small>Diferencia</small><strong id="ajusteDif">—</strong></div>
+          <div><small>Stock sistema</small><strong id="ajusteSistema">�</strong></div>
+          <div><small>Diferencia</small><strong id="ajusteDif">�</strong></div>
         </div>
         <label>Stock contado<input name="stock_fisico" inputmode="decimal" placeholder="Ej.: 9,5" required></label>
         <label>Motivo<input name="motivo" required maxlength="500" placeholder="Ej.: conteo semanal"></label>
@@ -293,8 +307,8 @@ if ('serviceWorker' in navigator) {
     </section>
 
     <section id="depCatalogo" hidden class="tarjeta">
-      <h2>Catálogo</h2>
-      <p class="ayuda">Productos por categoría con su stock.</p>
+      <h2>Cat�logo</h2>
+      <p class="ayuda">Productos por categor�a con su stock.</p>
       <div id="depChips" class="chips"></div>
       <div id="depGrupos"></div>
     </section>
@@ -318,7 +332,7 @@ if ('serviceWorker' in navigator) {
   </section>
 
   <section id="gestion" hidden>
-    <button type="button" id="vpBoton" class="cobrar" style="display:block; margin-bottom:14px;">📜 Ventas Pasadas</button>
+    <button type="button" id="vpBoton" class="cobrar" style="display:block; margin-bottom:14px;">?? Ventas Pasadas</button>
 
     <div class="grilla">
       <div class="tarjeta">
@@ -327,24 +341,24 @@ if ('serviceWorker' in navigator) {
           <input type="hidden" name="id">
           <label>Nombre<input name="nombre" required maxlength="120"></label>
           <div class="grilla">
-            <label>Categoría<select name="categoria_id" id="categoriaProducto"></select></label>
-            <label>Subcategoría<select name="subcategoria_id" id="subcategoriaProducto"></select></label>
+            <label>Categor�a<select name="categoria_id" id="categoriaProducto"></select></label>
+            <label>Subcategor�a<select name="subcategoria_id" id="subcategoriaProducto"></select></label>
             <label>Unidad de stock y precio<select name="unidad" id="unidad">
               <option value="UNIDAD">Unidad</option><option value="KG">Kilogramo (KG)</option>
             </select></label>
-            <label>Código interno (opcional)<input name="codigo_interno" maxlength="80"></label>
-            <label>Código de barras (opcional)<input name="codigo_barra" maxlength="80" placeholder="Ej.: 7791234567890"></label>
+            <label>C�digo interno (opcional)<input name="codigo_interno" maxlength="80"></label>
+            <label>C�digo de barras (opcional)<input name="codigo_barra" maxlength="80" placeholder="Ej.: 7791234567890"></label>
             <label>Costo<input name="costo" inputmode="decimal" value="0" required></label>
             <label>Precio por unidad seleccionada<input name="precio" inputmode="decimal" required></label>
-            <label>Precio fijo (opcional)<input name="precio_fijo" id="precioFijo" inputmode="decimal" placeholder="Vacío = costo × margen del rubro"></label>
+            <label>Precio fijo (opcional)<input name="precio_fijo" id="precioFijo" inputmode="decimal" placeholder="Vac�o = costo � margen del rubro"></label>
             <label>Stock inicial<input name="stock_inicial" inputmode="decimal" value="0" required></label>
-            <label>Stock mínimo<input name="stock_minimo" inputmode="decimal" value="0" required></label>
-            <label id="filaVariantes" class="ayuda">Variantes (solo unidad) — ej.: Talle: S, M, L
+            <label>Stock m�nimo<input name="stock_minimo" inputmode="decimal" value="0" required></label>
+            <label id="filaVariantes" class="ayuda">Variantes (solo unidad) � ej.: Talle: S, M, L
               <input name="variantes" maxlength="200" placeholder="Talle: S, M, L"></label>
           </div>
           <label><input type="checkbox" name="activo" checked style="display:inline;width:auto;margin-right:6px"> Producto activo</label>
           <p class="ayuda">En KG escriba 0,350 para 350 gramos. El stock inicial queda registrado a su nombre.</p>
-          <p class="ayuda">Precio HÍBRIDO: si completás el «precio fijo» la caja cobra ese monto exacto; si lo dejás vacío, se calcula <b>costo × (1 + margen del rubro)</b>. El margen se ajusta más abajo, en «Precios por rubro».</p>
+          <p class="ayuda">Precio H�BRIDO: si complet�s el �precio fijo� la caja cobra ese monto exacto; si lo dej�s vac�o, se calcula <b>costo � (1 + margen del rubro)</b>. El margen se ajusta m�s abajo, en �Precios por rubro�.</p>
           <button>Guardar producto</button>
           <button type="button" id="nuevo" class="secundario">Limpiar formulario</button>
         </form>
@@ -353,16 +367,16 @@ if ('serviceWorker' in navigator) {
 
       <div>
         <div class="tarjeta">
-          <h2>Categorías</h2>
+          <h2>Categor�as</h2>
           <form id="categoria">
             <label>Nombre<input name="nombre" required maxlength="120"></label>
-            <button>Crear categoría</button>
+            <button>Crear categor�a</button>
           </form>
-          <h3>Subcategorías</h3>
+          <h3>Subcategor�as</h3>
           <form id="subcategoria">
-            <label>Categoría<select name="categoria_id" id="categoriaSub" required></select></label>
+            <label>Categor�a<select name="categoria_id" id="categoriaSub" required></select></label>
             <label>Nombre<input name="nombre" required maxlength="120"></label>
-            <button>Crear subcategoría</button>
+            <button>Crear subcategor�a</button>
           </form>
           <div id="arbol"></div>
         </div>
@@ -373,16 +387,16 @@ if ('serviceWorker' in navigator) {
             <label>Nombre<input name="nombre" required></label>
             <label>Usuario<input name="usuario" required maxlength="50" autocomplete="off"></label>
             <label>Rol<select name="rol">
-              <option value="caja">Caja</option><option value="deposito">Depósito</option><option value="administrador">Administrador</option>
+              <option value="caja">Caja</option><option value="deposito">Dep�sito</option><option value="administrador">Administrador</option>
             </select></label>
-            <label>Contraseña (10 caracteres mínimo)<input name="clave" type="password" required minlength="10" maxlength="128" autocomplete="new-password"></label>
+            <label>Contrase�a (10 caracteres m�nimo)<input name="clave" type="password" required minlength="10" maxlength="128" autocomplete="new-password"></label>
             <button>Crear usuario</button>
           </form>
           <div id="usuarios" class="usuarios-lista"></div>
         </div>
 
         <div class="tarjeta" id="tarjetaArqueos">
-          <h2>Arqueos históricos</h2>
+          <h2>Arqueos hist�ricos</h2>
           <form id="arqFiltros" class="fila">
             <label>Desde<input name="desde" type="date"></label>
             <label>Hasta<input name="hasta" type="date"></label>
@@ -394,12 +408,12 @@ if ('serviceWorker' in navigator) {
 
         <div class="tarjeta" id="tarjetaVentas" hidden>
           <h2>Ventas Pasadas</h2>
-          <p class="ayuda">Historial completo de ventas: filtre por fechas o vea todo el histórico.</p>
+          <p class="ayuda">Historial completo de ventas: filtre por fechas o vea todo el hist�rico.</p>
           <form id="vpFiltros" class="fila">
             <label>Desde<input name="desde" type="date"></label>
             <label>Hasta<input name="hasta" type="date"></label>
             <button class="secundario">Filtrar</button>
-            <button type="button" id="vpTodas" class="secundario">Histórico completo</button>
+            <button type="button" id="vpTodas" class="secundario">Hist�rico completo</button>
           </form>
           <p id="vpResumen" class="ayuda"></p>
           <div id="vpTabla" class="dep-tabla"></div>
@@ -410,7 +424,7 @@ if ('serviceWorker' in navigator) {
           <p class="ayuda">Suba o baje los precios con un porcentaje.</p>
           <form id="preciosMasivo">
             <div class="fila">
-              <label>Categoría<select name="categoria_id" id="catPrecios"><option value="">Todas las categorías</option></select></label>
+              <label>Categor�a<select name="categoria_id" id="catPrecios"><option value="">Todas las categor�as</option></select></label>
               <label>Porcentaje %<input name="porcentaje" inputmode="decimal" placeholder="10 sube / -5 baja" required></label>
               <label>Redondeo a<select name="redondeo">
                 <option value="0">Sin redondeo</option><option value="10">$10</option>
@@ -423,22 +437,22 @@ if ('serviceWorker' in navigator) {
 
         <div class="tarjeta" id="tarjetaPrecios">
           <h2>Precios por rubro y precio fijo</h2>
-          <p class="ayuda">Dos niveles de precio: el <b>margen de ganancia del rubro</b> (se aplica sobre el costo) y el <b>precio fijo individual</b> de cada SKU (excepción manual que la caja cobra exacta).</p>
+          <p class="ayuda">Dos niveles de precio: el <b>margen de ganancia del rubro</b> (se aplica sobre el costo) y el <b>precio fijo individual</b> de cada SKU (excepci�n manual que la caja cobra exacta).</p>
 
-          <h3>Margen de ganancia por categoría</h3>
+          <h3>Margen de ganancia por categor�a</h3>
           <p class="ayuda">Porcentaje que se suma al costo para calcular el precio de venta cuando el producto no tiene precio fijo.</p>
-          <div id="margenesLista" class="margenes-lista"><p class="ayuda">Cargando…</p></div>
+          <div id="margenesLista" class="margenes-lista"><p class="ayuda">Cargando�</p></div>
 
           <h3>Buscar producto y fijar su precio</h3>
-          <p class="ayuda">Permite corregir el costo y «clavar» un precio final manual. Deje el precio fijo vacío para volver al margen del rubro.</p>
-          <label>Buscar<input id="precioBuscar" type="search" placeholder="Nombre o código de barras"></label>
-          <div id="precioResultados" class="precio-resultados"><p class="ayuda">Escriba un nombre o escanee un código.</p></div>
+          <p class="ayuda">Permite corregir el costo y �clavar� un precio final manual. Deje el precio fijo vac�o para volver al margen del rubro.</p>
+          <label>Buscar<input id="precioBuscar" type="search" placeholder="Nombre o c�digo de barras"></label>
+          <div id="precioResultados" class="precio-resultados"><p class="ayuda">Escriba un nombre o escanee un c�digo.</p></div>
         </div>
 
         <div class="tarjeta">
           <h2>Productos en Excel</h2>
-          <p class="ayuda">Descargue la lista, edite precios en Excel y vuelva a importar (CSV con «;» y coma decimal).</p>
-          <a class="secundario descarga" href="/api/productos/csv" download="360max-productos.csv">⬇️ Descargar lista CSV</a>
+          <p class="ayuda">Descargue la lista, edite precios en Excel y vuelva a importar (CSV con �;� y coma decimal).</p>
+          <a class="secundario descarga" href="/api/productos/csv" download="360max-productos.csv">?? Descargar lista CSV</a>
           <label>Importar CSV<input type="file" id="csvArchivo" accept=".csv,text/csv"></label>
           <button type="button" id="csvImportar" class="secundario">Importar / actualizar</button>
           <div id="csvResultado" class="ayuda"></div>
@@ -458,7 +472,7 @@ if ('serviceWorker' in navigator) {
     <h2>Cobrar venta</h2>
     <div class="modal-total"><small>Total a cobrar</small><strong id="cobroTotal">$0</strong></div>
     <label>Cliente (para cuenta corriente)
-      <select id="cobroCliente"><option value="">— Sin cliente —</option></select></label>
+      <select id="cobroCliente"><option value="">� Sin cliente �</option></select></label>
     <h3>Medios de pago</h3>
     <div id="cobroPagos" class="cobros"></div>
     <button type="button" id="cobroAgregar" class="secundario">+ Agregar otro medio de pago</button>
@@ -469,22 +483,22 @@ if ('serviceWorker' in navigator) {
   </div>
 
   <div id="modalTicket" class="tarjeta modal" hidden>
-    <h2>✅ Venta registrada — Ticket <span id="ticketNum"></span></h2>
+    <h2>? Venta registrada � Ticket <span id="ticketNum"></span></h2>
     <div id="ticketVista" class="ticket-vista"></div>
     <label>Ancho de papel
-      <select id="ticketAncho"><option value="58">58 mm (estándar)</option><option value="80">80 mm</option></select>
+      <select id="ticketAncho"><option value="58">58 mm (est�ndar)</option><option value="80">80 mm</option></select>
     </label>
-    <button type="button" id="ticketImprimir" class="cobrar">🖨️ IMPRIMIR</button>
+    <button type="button" id="ticketImprimir" class="cobrar">??? IMPRIMIR</button>
     <button type="button" id="ticketCerrar" class="secundario">Nueva venta</button>
   </div>
 
   <div id="modalDevolucion" class="tarjeta modal" hidden>
-    <h2>Devolución de venta <span id="devVentaNum"></span></h2>
+    <h2>Devoluci�n de venta <span id="devVentaNum"></span></h2>
     <div id="devProductos" class="dev-productos"></div>
     <label>Motivo (obligatorio)<input id="devMotivo" maxlength="500" placeholder="Ej.: producto en mal estado"></label>
     <label class="opcional"><input type="checkbox" id="devReintegro" checked style="display:inline;width:auto;margin-right:6px"> Reintegrar stock de los productos devueltos</label>
     <p id="devResumen" class="ayuda"></p>
-    <button type="button" id="devConfirmar" class="cobrar">CONFIRMAR DEVOLUCIÓN</button>
+    <button type="button" id="devConfirmar" class="cobrar">CONFIRMAR DEVOLUCI�N</button>
     <button type="button" id="devCancelar" class="secundario">Cancelar</button>
   </div>
 
@@ -497,38 +511,38 @@ if ('serviceWorker' in navigator) {
   </div>
 
   <div id="modalCamara" class="tarjeta modal" hidden>
-    <h2>Escanear código</h2>
+    <h2>Escanear c�digo</h2>
     <video id="camaraVideo" playsinline webkit-playsinline muted autoplay></video>
-    <button type="button" id="camaraIniciar" class="cobrar" hidden>▶ INICIAR VIDEO</button>
+    <button type="button" id="camaraIniciar" class="cobrar" hidden>? INICIAR VIDEO</button>
     <p id="camaraEstado" class="ayuda" role="status" aria-live="polite"></p>
-    <label>Código leído<input id="camaraCodigo" inputmode="numeric" maxlength="40" placeholder="Escriba el código"></label>
-    <button type="button" id="camaraUsar" class="secundario">Buscar código</button>
-    <p class="ayuda">Apunte al código de barras. También sirve un lector USB.</p>
+    <label>C�digo le�do<input id="camaraCodigo" inputmode="numeric" maxlength="40" placeholder="Escriba el c�digo"></label>
+    <button type="button" id="camaraUsar" class="secundario">Buscar c�digo</button>
+    <p class="ayuda">Apunte al c�digo de barras. Tambi�n sirve un lector USB.</p>
     <button type="button" id="camaraCerrar" class="secundario">Cerrar</button>
   </div>
 
   <div id="modalCamaraDep" class="tarjeta modal" hidden>
-    <h2>Escanear código — Depósito</h2>
+    <h2>Escanear c�digo � Dep�sito</h2>
     <video id="camaraDepVideo" playsinline webkit-playsinline muted autoplay></video>
-    <button type="button" id="camaraDepIniciar" class="cobrar" hidden>▶ INICIAR VIDEO</button>
+    <button type="button" id="camaraDepIniciar" class="cobrar" hidden>? INICIAR VIDEO</button>
     <p id="camaraDepEstado" class="ayuda" role="status" aria-live="polite"></p>
-    <label>Código leído<input id="camaraDepCodigo" inputmode="numeric" maxlength="40" placeholder="Escriba el código"></label>
-    <button type="button" id="camaraDepUsar" class="secundario">Buscar código</button>
-    <p class="ayuda">Apunte al código de barras. También sirve un lector USB.</p>
+    <label>C�digo le�do<input id="camaraDepCodigo" inputmode="numeric" maxlength="40" placeholder="Escriba el c�digo"></label>
+    <button type="button" id="camaraDepUsar" class="secundario">Buscar c�digo</button>
+    <p class="ayuda">Apunte al c�digo de barras. Tambi�n sirve un lector USB.</p>
     <button type="button" id="camaraDepCerrar" class="secundario">Cerrar</button>
   </div>
 </div>
 
 </main>
 
-<!-- Contenedor invisible del ticket térmico (hermano de main: impresible sin display:none) -->
+<!-- Contenedor invisible del ticket t�rmico (hermano de main: impresible sin display:none) -->
 <div id="ticketImpresion" aria-hidden="true"></div>
 <!-- Contenedor invisible del reporte de cierre de caja (se imprime con window.print()) -->
 <div id="reporteImpresion" aria-hidden="true"></div>
-<script src="/app.js?v=20261014a"></script>
-<script src="/caja.js?v=20261014a"></script>
-<script src="/deposito.js?v=20261014a"></script>
-<script src="/admin.js?v=20261014a"></script>
+<script src="/app.js?v=20261014b"></script>
+<script src="/caja.js?v=20261014b"></script>
+<script src="/deposito.js?v=20261014b"></script>
+<script src="/admin.js?v=20261014b"></script>
 </body>
 </html>
 
