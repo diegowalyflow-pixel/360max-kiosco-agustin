@@ -18,3 +18,9 @@ check_demo.txt
 git_out.txt
 # accesos directos del kit de entrega (se regeneran con `npm run kit` en cada PC)
 Drugstore Agustin/*.lnk
+# Temporales de sesión: scripts de inyección de stock y volcados del PDF
+_*.js
+_*.mjs
+_*.json
+_*.txt
+!ejemplo-productos.csv
