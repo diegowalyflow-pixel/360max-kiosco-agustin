@@ -83,7 +83,7 @@ router.post('/api/caja/apertura', exigirRol('caja'), atender(async (req, res) =>
     const caja = await db.prepare('SELECT * FROM cajas WHERE id = ?').get(Number(caja_id));
     if (!caja) throw error(400, 'Caja inexistente.');
     const ins = await db.prepare(
-      'INSERT INTO turnos (caja_id, usuario_id, fondo, fondo_centavos) VALUES (?, ?, ?, ?)')
+      'INSERT INTO turnos (caja_id, usuario_id, fondo, fondo_centavos, estado) VALUES (?, ?, ?, ?, \'abierta\')')
       .run(caja.id, req.usuario.id, centavos / 100, centavos);
     await db.prepare("INSERT INTO auditoria (evento, detalle, usuario_id) VALUES ('apertura_caja', ?, ?)")
       .run(`Apertura de ${caja.nombre} con fondo ${dinero(centavos / 100)} (${centavos} centavos)`, req.usuario.id);
