@@ -238,6 +238,23 @@ CREATE TABLE IF NOT EXISTS auditoria (
   usuario_id INTEGER REFERENCES usuarios(id),
   fecha TEXT NOT NULL DEFAULT (datetime('now','localtime'))
 );
+CREATE TABLE IF NOT EXISTS arqueos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  turno_id INTEGER NOT NULL REFERENCES turnos(id) ON DELETE CASCADE,
+  esperado REAL,
+  contado REAL,
+  diferencia REAL,
+  observaciones TEXT,
+  fecha TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+);
+CREATE TABLE IF NOT EXISTS pagos_clientes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id INTEGER REFERENCES clientes(id) ON DELETE SET NULL,
+  monto REAL NOT NULL,
+  motivo TEXT,
+  usuario_id INTEGER REFERENCES usuarios(id),
+  fecha TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+);
 
 `;
 
