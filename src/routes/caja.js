@@ -36,16 +36,18 @@ router.get('/api/caja/estado', exigirSesion, atender(async (req, res) => {
   const abierto = await turnoAbierto();
   const cierre = await db.prepare(`
     SELECT t.*, c.nombre AS caja, u.nombre AS usuario
-      FROM turnos t JOIN cajas c ON c.id = t.caja_id JOIN usuarios u ON u.id = t.usuario_id
+      FROM turnos t LEFT JOIN cajas c ON c.id = t.caja_id LEFT JOIN usuarios u ON u.id = t.usuario_id
      WHERE t.estado = 'cerrada' ORDER BY t.id DESC LIMIT 1`).get();
   let turno = null;
   if (abierto) {
     const tv = await db.prepare(`
       SELECT IFNULL(SUM(total), 0) t, COUNT(*) n FROM ventas
        WHERE turno_id = ? AND estado = 'completada'`).get(abierto.id);
+    const cajaFila = await db.prepare('SELECT nombre FROM cajas WHERE id = ?').get(abierto.caja_id);
+    const usuFila = await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(abierto.usuario_id);
     turno = Object.assign({}, abierto, {
-      caja: (await db.prepare('SELECT nombre FROM cajas WHERE id = ?').get(abierto.caja_id)).nombre,
-      usuario: (await db.prepare('SELECT nombre FROM usuarios WHERE id = ?').get(abierto.usuario_id)).nombre,
+      caja: (cajaFila && cajaFila.nombre) || ('Caja #' + abierto.caja_id),
+      usuario: (usuFila && usuFila.nombre) || ('Usuario #' + abierto.usuario_id),
       /* El cajero que opera ahora puede no ser quien abrió el turno: la UI
          necesita saberlo para avisar que está cobrando sobre el turno ajeno. */
       abierto_por_mismo: abierto.usuario_id === req.usuario.id,

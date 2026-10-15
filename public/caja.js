@@ -94,13 +94,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   q('#formApertura').addEventListener('submit', async (ev) => {
     ev.preventDefault();
+    const boton = ev.target.querySelector('button');
+    const txt = boton ? boton.textContent : '';
+    if (boton) { boton.disabled = true; boton.textContent = 'ABRIENDO…'; }
     const fd = new FormData(ev.target);
     try {
-      await api('/api/caja/apertura', { method: 'POST', body: { cajaíid: fd.get('cajaíid'), fondo: num(fd.get('fondo')) ?? 0 } });
-      aviso('âœ“ Caja abierta. áListo para vender!', 'ok');
+      await api('/api/caja/apertura', { method: 'POST', body: { caja_id: fd.get('caja_id'), fondo: num(fd.get('fondo')) ?? 0 } });
+      aviso('✓ Caja abierta. ¡Listo para vender!', 'ok');
       ev.target.reset();
       await refrescarTurno();
-    } catch (e) { aviso(e.message, 'error'); }
+    } catch (e) {
+      /* Si el turno ya se abrió (doble clic / otra terminal), refrescamos
+         para pasar a Vender en vez de quedar clavados en Abrir caja. */
+      if (e && (e.status === 409 || /ya hay/i.test(e.message || ''))) {
+        aviso('La caja ya estaba abierta. Actualizando…', 'ok');
+        try { await refrescarTurno(); } catch (_) { /* noop */ }
+        if (q('#posPrincipal') && !q('#posPrincipal').hidden) return;
+      }
+      aviso(e.message, 'error');
+      try { q('#mensaje').scrollIntoView({ block: 'center' }); } catch (_) { /* noop */ }
+    } finally {
+      if (boton) { boton.disabled = false; boton.textContent = txt || 'ABRIR CAJA'; }
+    }
   });
 
   /* =========================================================
