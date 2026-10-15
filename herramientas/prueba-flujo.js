@@ -12,10 +12,14 @@ const fs = require('fs');
 
 const DB = path.join(os.tmpdir(), '360max-prueba-' + process.pid + '.db');
 process.env.DB_PATH = DB;
-process.env.SEMBRAR_DEMO = '1';
-process.env.CLAVE_DEMO = 'demo360max!';
+/* El administrador lo da de alta (y valida el login) la env ADMIN_*: db.js ya no
+   siembra la demo vieja ni exporta CLAVE_DEMO. */
+process.env.ADMIN_USUARIO = 'administrador';
+process.env.ADMIN_CLAVE = 'demo360max!';
+process.env.ADMIN_NOMBRE = 'Agustín prueba';
+const CLAVE = process.env.ADMIN_CLAVE;
 
-const { lista, CLAVE_DEMO } = require('../src/db');
+const { lista, prepare } = require('../src/db');
 const { crearApp } = require('../src/server');
 
 let fallos = 0;
@@ -25,7 +29,17 @@ function ok(cond, txt) {
 }
 
 (async () => {
-  await lista;                                     /* base lista (esquema + demo) */
+  await lista;                                     /* base lista (esquema + admin) */
+
+  /* Fixtures mínimos: un rubro con margen y un producto con código de barras,
+     stock y costo. Hoy db.js no siembra la demo vieja (en Render se carga la
+     lista real de Agustín solo si la base arranca vacía). */
+  const rubro = await prepare("INSERT INTO categorias (nombre, margen_ganancia_defecto) VALUES ('Bebidas', 40)").run();
+  await prepare(`INSERT INTO productos
+                   (nombre, categoria_id, unidad, codigo_barra, costo, costo_centavos, precio, stock, stock_minimo, activo)
+                 VALUES ('Alfajor de prueba', ?, 'UNIDAD', '7790000000001', 100, 10000, 140, 10, 2, 1)`)
+    .run(rubro.lastInsertRowid);
+
   const app = crearApp();
   const server = await new Promise((r) => { const s = app.listen(0, () => r(s)); });
   const base = 'http://127.0.0.1:' + server.address().port;
@@ -52,12 +66,20 @@ function ok(cond, txt) {
     const est = await req('GET', '/api/auth/estado');
     ok(est.datos && est.datos.primer_uso === false, 'la demo sembró al administrador (primer_uso=false)');
 
-    const login = await req('POST', '/api/auth/continuar', { usuario: 'administrador', clave: CLAVE_DEMO });
+    const login = await req('POST', '/api/auth/continuar', { usuario: 'administrador', clave: CLAVE });
     ok(login.status === 200 && login.datos.usuario && login.datos.usuario.rol === 'administrador',
       'ingreso de administrador: ' + (login.datos.usuario && login.datos.usuario.nombre));
 
-    const estado = await req('GET', '/api/caja/estado');
-    ok(!!estado.datos.turno, 'turno de demo abierto: ' + (estado.datos.turno && estado.datos.turno.caja));
+    /* No hay turno nacido con la base: la caja se abre desde acá (mismo camino
+       que usa el navegador: fondo en CENTAVOS enteros). */
+    let estado = await req('GET', '/api/caja/estado');
+    if (!estado.datos.turno) {
+      const ap = await req('POST', '/api/caja/apertura', { caja_id: 1, fondo_centavos: 100000 });
+      ok(ap.status === 201 && ap.datos.fondo_centavos === 100000,
+        'apertura de caja con fondo en centavos: ' + (ap.datos && ap.datos.fondo_centavos));
+      estado = await req('GET', '/api/caja/estado');
+    }
+    ok(!!estado.datos.turno, 'turno abierto: ' + (estado.datos.turno && estado.datos.turno.caja));
     ok(estado.datos.turno && estado.datos.turno.abierto_por_mismo === true, 'bandera «abierto_por_mismo» presente');
 
     const prods = (await req('GET', '/api/productos')).datos || [];
@@ -117,6 +139,18 @@ function ok(cond, txt) {
     ok(Number.isInteger(arq.datos.esperado_centavos), 'arqueo en centavos enteros — esperado_centavos=' + arq.datos.esperado_centavos);
     ok(Number.isInteger(arq.datos.fondo_centavos), 'fondo en centavos enteros — fondo_centavos=' + arq.datos.fondo_centavos);
 
+    /* Regresión del cierre de caja: movimientos_caja nació con «monto» y sin
+       «usuario_id» en la base vieja de Render, y el cierre reventaba con
+       «no such column: importe». Este movimiento prueba las dos columnas. */
+    const mov = await req('POST', '/api/caja/movimiento',
+      { tipo: 'ingreso', importe: 50, motivo: 'Ingreso de prueba del arqueo' });
+    ok(mov.status === 201, 'movimiento de efectivo registrado (columnas importe/usuario_id)');
+    const arq2 = await req('GET', '/api/caja/arqueo');
+    ok(arq2.datos.esperado_centavos === arq.datos.esperado_centavos + 5000,
+      'el ingreso entra al esperado: ' + arq.datos.esperado_centavos + ' → ' + arq2.datos.esperado_centavos);
+    ok(Array.isArray(arq2.datos.movimientos) && arq2.datos.movimientos.length === 1,
+      'el movimiento figura en el detalle del arqueo');
+
     const espejo = await req('GET', '/api/admin/espejo');
     ok(espejo.status === 200 && espejo.datos.turno && espejo.datos.hoy && Array.isArray(espejo.datos.stock_bajo),
       'espejo remoto: turno, ventas de hoy y stock bajo');
@@ -125,7 +159,7 @@ function ok(cond, txt) {
     const turnos = await req('GET', '/api/caja/turnos');
     ok(Array.isArray(turnos.datos) && turnos.datos.length >= 1, 'historial de turnos accesible');
 
-    const cierre = await req('POST', '/api/caja/cierre', { contado: arq.datos.esperado, observaciones: '' });
+    const cierre = await req('POST', '/api/caja/cierre', { contado: arq2.datos.esperado, observaciones: '' });
     ok(cierre.status === 200 && cierre.datos.diferencia_centavos === 0,
       'cierre cuadrado al centavo — diferencia=' + (cierre.datos && cierre.datos.diferencia));
 

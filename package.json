@@ -13,6 +13,7 @@
     "cargar-lista": "node src/tools/cargar-lista-agustin.js",
     "revisar": "node herramientas/revision.js",
     "probar": "node herramientas/prueba-flujo.js",
+    "probar-migracion": "node herramientas/prueba-migracion.js",
     "verificar-catalogo": "node herramientas/verificar-catalogo.js",
     "kit": "node herramientas/crear-accesos-directos.js",
     "verificar-instalacion": "node herramientas/verificar-instalacion.js",

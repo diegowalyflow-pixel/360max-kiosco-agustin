@@ -227,8 +227,9 @@ CREATE TABLE IF NOT EXISTS movimientos_caja (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   turno_id INTEGER NOT NULL REFERENCES turnos(id) ON DELETE CASCADE,
   tipo TEXT NOT NULL CHECK (tipo IN ('ingreso','egreso')),
-  monto REAL NOT NULL,
+  importe REAL NOT NULL,
   motivo TEXT,
+  usuario_id INTEGER REFERENCES usuarios(id),
   fecha TEXT NOT NULL DEFAULT (datetime('now','localtime'))
 );
 CREATE TABLE IF NOT EXISTS auditoria (
@@ -297,6 +298,29 @@ async function crearCajaInicial() {
   await ejecutarCrudo("INSERT INTO cajas (nombre) VALUES ('Caja Principal')");
 }
 
+/* ===== Migración de esquemas viejos (bases ya desplegadas) =====
+   `CREATE TABLE IF NOT EXISTS` NUNCA modifica una tabla que ya existe: la base
+   de Render se creó con la versión inicial de movimientos_caja, que tenía la
+   columna «monto» y NO tenía «usuario_id». Todo el código (arqueo, cierre de
+   caja, espejo del admin y pagos de clientes) escribe y lee «importe» y
+   «usuario_id», así que el cierre reventaba con:
+       SQLITE_ERROR: no such column: importe
+   y NO se registraba NI el cierre NI los movimientos de efectivo.
+   Acá se alinea la tabla vieja con el esquema actual sin perder datos: se
+   renombra «monto» a «importe» (se conservan las filas) y se agrega «usuario_id». */
+async function migrarEsquema() {
+  const cols = (await todosCrudo('PRAGMA table_info(movimientos_caja)', [])).map((c) => c.name);
+  if (!cols.length) return;                              // la tabla no existe aún
+  if (cols.includes('monto') && !cols.includes('importe')) {
+    await ejecutarCrudo('ALTER TABLE movimientos_caja RENAME COLUMN monto TO importe', []);
+    console.log('[360MAX] Migración: movimientos_caja.monto → importe.');
+  }
+  if (!cols.includes('usuario_id')) {
+    await ejecutarCrudo('ALTER TABLE movimientos_caja ADD COLUMN usuario_id INTEGER REFERENCES usuarios(id)', []);
+    console.log('[360MAX] Migración: movimientos_caja + columna usuario_id.');
+  }
+}
+
 
 const lista = new Promise((resolve, reject) => {
   conector = new sqlite3.Database(DB_PATH, async (err) => {
@@ -307,6 +331,7 @@ const lista = new Promise((resolve, reject) => {
     try {
       await ejecutarCrudo("PRAGMA foreign_keys = ON");
       await scriptCrudo(ESQUEMA);
+      await migrarEsquema();
       await sembrarDatos();
       resolve();
     } catch (e) {
