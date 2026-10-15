@@ -121,6 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ev.target.reset();
       await refrescarTurno();
     } catch (e) {
+      /* Si el turno ya se abrió (doble clic / otra terminal), refrescamos
+         para pasar a Vender en vez de quedar clavados en Abrir caja. */
       if (e && (e.status === 409 || /ya hay/i.test(e.message || ''))) {
         aviso('La caja ya estaba abierta. Actualizando…', 'ok');
         try { await refrescarTurno(); } catch (_) { /* noop */ }
