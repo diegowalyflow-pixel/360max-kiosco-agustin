@@ -70,9 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const ses = getSesion();
       q('#aperturaUsuario').textContent = ses ? ses.nombre : 'â€”';
       q('#aperturaFecha').textContent = new Date().toLocaleString('es-AR');
-      q('#aperturaCierre').textContent = r.cierreíanterior
-        ? `${r.cierreíanterior.caja} á ${r.cierreíanterior.fechaícierre} á ${money(r.cierreíanterior.contado)}`
-        : 'â€”';
+      q('#aperturaCierre').textContent = r.cierre_anterior
+        ? `${r.cierre_anterior.caja} · ${r.cierre_anterior.fecha_cierre} · ${money(r.cierre_anterior.contado)}`
+        : '—';
       const cajas = await api('/api/cajas');
       q('#aperturaCaja').innerHTML = cajas.map((c) => `<option value="${c.id}">${esc(c.nombre)}</option>`).join('');
     } else {
@@ -83,24 +83,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* Si entró a la vista Caja (botón Caja / login rol caja), cargar estado +
+     productos. Sin esto apretaba Caja y quedaba vacío / no entraba. */
+  try {
+    window.bus.addEventListener('vista', (ev) => {
+      if (!ev || ev.detail !== 'pos') return;
+      refrescarTurno().catch((e) => aviso(e.message, 'error'));
+      recargarProductos().catch(() => {});
+    });
+    /* Si ya está en Caja (login rol caja entró antes de registrar),
+       cargar igual ahora. */
+    if (q('#pos') && !q('#pos').hidden) {
+      refrescarTurno().catch(() => {});
+      recargarProductos().catch(() => {});
+    }
+  } catch (_) { /* noop */ }
+  window.refrescarTurno = refrescarTurno;
+
   function pintarEstadoTurno() {
     q('#posEstado').innerHTML = `
       <span class="dato"><small>Caja</small><b>${esc(turno.caja)}</b></span>
       <span class="dato"><small>Cajero</small><b>${esc(turno.usuario)}</b></span>
-      <span class="dato"><small>Desde</small><b>${esc(turno.fechaíapertura)}</b></span>
+      <span class="dato"><small>Desde</small><b>${esc(turno.fecha_apertura)}</b></span>
       <span class="dato"><small>Fondo</small><b>${money(turno.fondo)}</b></span>
-      <span class="dato"><small>Ventas</small><b>${turno.ventasín} á ${money(turno.ventasítotal)}</b></span>`;
+      <span class="dato"><small>Ventas</small><b>${turno.ventas_n} · ${money(turno.ventas_total)}</b></span>`;
   }
 
   q('#formApertura').addEventListener('submit', async (ev) => {
     ev.preventDefault();
+    const boton = ev.target.querySelector('button');
+    const txt = boton ? boton.textContent : '';
+    if (boton) { boton.disabled = true; boton.textContent = 'ABRIENDO…'; }
     const fd = new FormData(ev.target);
     try {
-      await api('/api/caja/apertura', { method: 'POST', body: { cajaíid: fd.get('cajaíid'), fondo: num(fd.get('fondo')) ?? 0 } });
-      aviso('âœ“ Caja abierta. áListo para vender!', 'ok');
+      await api('/api/caja/apertura', { method: 'POST', body: { caja_id: fd.get('caja_id'), fondo: num(fd.get('fondo')) ?? 0 } });
+      aviso('✓ Caja abierta. ¡Listo para vender!', 'ok');
       ev.target.reset();
       await refrescarTurno();
-    } catch (e) { aviso(e.message, 'error'); }
+    } catch (e) {
+      if (e && (e.status === 409 || /ya hay/i.test(e.message || ''))) {
+        aviso('La caja ya estaba abierta. Actualizando…', 'ok');
+        try { await refrescarTurno(); } catch (_) { /* noop */ }
+        if (q('#posPrincipal') && !q('#posPrincipal').hidden) return;
+      }
+      aviso(e.message, 'error');
+      try { q('#mensaje').scrollIntoView({ block: 'center' }); } catch (_) { /* noop */ }
+    } finally {
+      if (boton) { boton.disabled = false; boton.textContent = txt || 'ABRIR CAJA'; }
+    }
   });
 
   /* =========================================================
