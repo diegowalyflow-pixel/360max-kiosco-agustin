@@ -434,8 +434,8 @@ document.addEventListener('DOMContentLoaded', () => {
      6) COBRO â†’ TRANSACCIí“N REAL â†’ TICKET â†’ window.print()
      ========================================================= */
   const MEDIOS = [
-    ['efectivo', 'Efectivo'], ['debito', 'Dí©bito'], ['credito', 'Crí©dito'],
-    ['transferencia', 'Transferencia'], ['cuentaícorriente', 'Cuenta corriente']
+    ['efectivo', 'Efectivo'], ['debito', 'Débito'], ['credito', 'Crédito'],
+    ['transferencia', 'Transferencia'], ['cuenta_corriente', 'Cuenta corriente']
   ];
 
   function filaPago(medio, monto) {
@@ -509,9 +509,9 @@ document.addEventListener('DOMContentLoaded', () => {
     })).filter((p) => p.monto > 0);
     if (!pagos.length) return aviso('Escriba el importe pagado.', 'error');
     const cuerpo = {
-      items: carrito.map((l) => ({ productoíid: l.id, cantidad: l.cantidad })),
+      items: carrito.map((l) => ({ producto_id: l.id, cantidad: l.cantidad })),
       pagos,
-      clienteíid: q('#cobroCliente').value ? Number(q('#cobroCliente').value) : null
+      cliente_id: q('#cobroCliente').value ? Number(q('#cobroCliente').value) : null
     };
     q('#cobroError').textContent = '';
     cobrando = true;
